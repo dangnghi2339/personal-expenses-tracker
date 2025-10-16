@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="20dp"
+    android:background="#F3F5F7"
+    tools:context=".CostalActivity">
+
+    <ImageButton
+        android:id="@+id/imageButton11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_close_login"
+        android:layout_marginLeft="340dp"
+        android:backgroundTint="#F3F5F7"/>
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="match_parent"
+        android:layout_height="188dp"
+        app:srcCompat="@drawable/logo1" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Log in"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:textStyle="bold"
+        android:textSize="25dp"/>
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Help you avoid losing important data"
+        android:gravity="center"
+        android:textSize="18dp"
+        android:layout_marginTop="5dp"/>
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Log in with Facebook"
+        android:backgroundTint="#1073F5"
+        android:layout_marginTop="15dp"
+        android:layout_gravity="center"
+        android:textSize="16sp"
+        app:cornerRadius="15dp" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Log in with Google"
+        android:backgroundTint="#DDDDDD"
+        android:layout_marginTop="1dp"
+        android:layout_gravity="center"
+        android:textSize="16sp"
+        android:textColor="#666666"
+        app:cornerRadius="15dp" />
+
+</LinearLayout>

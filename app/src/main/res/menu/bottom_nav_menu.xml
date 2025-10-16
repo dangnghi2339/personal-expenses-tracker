@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_rev_exp"
+        android:icon="@drawable/ic_rev_exp" android:title="Rev/Exp" />
+
+    <item
+        android:id="@+id/nav_calendar"
+        android:icon="@drawable/ic_calendar" android:title="Calendar" />
+
+    <item
+        android:id="@+id/nav_enter_1"
+        android:icon="@drawable/ic_enter_1" android:title="Enter" />
+
+    <item
+        android:id="@+id/nav_enter_2"
+        android:icon="@drawable/ic_enter_2" android:title="Enter" />
+
+</menu>
