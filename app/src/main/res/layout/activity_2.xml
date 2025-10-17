@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:paddingTop="20dp"
     android:background="#F3F5F7"
-    tools:context=".CostalActivity">
+    tools:context=".ui.view.CostalActivity">
 
     <ImageButton
         android:id="@+id/imageButton11"

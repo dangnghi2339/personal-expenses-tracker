@@ -29,7 +29,13 @@ android {
 }
 
 dependencies {
+// ViewModel and LiveData (Thành phần kiến trúc Jetpack)
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.8.2"
+    implementation "androidx.lifecycle:lifecycle-livedata:2.8.2"
 
+    // Room (Cơ sở dữ liệu)
+    implementation "androidx.room:room-runtime:2.6.1"
+    annotationProcessor "androidx.room:room-compiler:2.6.1"
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
