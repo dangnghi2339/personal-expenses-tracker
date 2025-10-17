@@ -7,7 +7,7 @@
     android:layout_height="915dp"
     android:orientation="vertical"
     android:background="#F3F5F7"
-    tools:context=".CostalActivity" >
+    tools:context=".ui.view.CostalActivity" >
 
     <LinearLayout
         android:layout_width="match_parent"
