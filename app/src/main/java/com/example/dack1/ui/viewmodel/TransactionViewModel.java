@@ -41,6 +41,9 @@ public class TransactionViewModel extends AndroidViewModel {
     public LiveData<List<CategorySum>> getExpenseSumByCategory() {
         return repository.getExpenseSumByCategory();
     }
+    public LiveData<List<Transaction>> getTransactionsByTimestampRange(long startDate, long endDate) {
+        return repository.getTransactionsByTimestampRange(startDate, endDate);
+    }
     /**
      * Ủy quyền thao tác chèn cho Repository.
      * Đây là phương thức mà UI sẽ gọi khi người dùng muốn lưu một giao dịch mới.

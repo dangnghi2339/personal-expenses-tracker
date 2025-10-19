@@ -105,7 +105,7 @@ public class AddTransactionActivity extends AppCompatActivity {
 
             // 2. Hardcode một categoryId (kiểu long)
             // (Theo phương châm "chạy đủ", ta hardcode là 1L, giả sử 1L là "Ăn uống")
-            long categoryId = 1L;
+            long categoryId = 2L;
 
             // 3. GỌI CONSTRUCTOR ĐÚNG (mới thêm ở Bước 1)
             // (amount, type, transactionDate, description, categoryId)

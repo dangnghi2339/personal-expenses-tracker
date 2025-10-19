@@ -46,6 +46,9 @@ public class TransactionRepository {
     public LiveData<List<CategorySum>> getExpenseSumByCategory() {
         return transactionDao.getExpenseSumByCategory();
     }
+    public LiveData<List<Transaction>> getTransactionsByTimestampRange(long startDate, long endDate) {
+        return transactionDao.getTransactionsByTimestampRange(startDate, endDate);
+    }
     /**
      * Chèn một giao dịch mới.
      * Thao tác này phải được thực hiện trên một luồng nền (background thread)

@@ -68,4 +68,11 @@ public interface TransactionDao {
      */
     @Query("SELECT category_id AS categoryId, SUM(amount) as total FROM transactions WHERE type = 'expense' GROUP BY category_id")
     LiveData<List<CategorySum>> getExpenseSumByCategory();
+
+    /**
+     * Lấy tất cả giao dịch trong một khoảng timestamp (từ 00:00:00 ngày bắt đầu
+     * đến 23:59:59 ngày kết thúc)
+     */
+    @Query("SELECT * FROM transactions WHERE transaction_date >= :startDate AND transaction_date <= :endDate ORDER BY transaction_date DESC")
+    LiveData<List<Transaction>> getTransactionsByTimestampRange(long startDate, long endDate);
 }
