@@ -59,4 +59,6 @@ public interface TransactionDao {
      */
     @Query("SELECT * FROM transactions WHERE id = :id")
     LiveData<Transaction> getTransactionById(long id);
+
+
 }

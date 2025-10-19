@@ -39,7 +39,9 @@ public class TransactionRepository {
     public LiveData<List<Transaction>> getAllTransactions() {
         return allTransactions;
     }
-
+    public LiveData<Transaction> getTransactionById(long id) {
+        return transactionDao.getTransactionById(id);
+    }
     /**
      * Chèn một giao dịch mới.
      * Thao tác này phải được thực hiện trên một luồng nền (background thread)
@@ -64,4 +66,5 @@ public class TransactionRepository {
             transactionDao.delete(transaction);
         });
     }
+
 }

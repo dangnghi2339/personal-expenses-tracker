@@ -24,6 +24,10 @@ public class TransactionViewModel extends AndroidViewModel {
         repository = new TransactionRepository(application);
         // Lấy LiveData từ Repository.
         allTransactions = repository.getAllTransactions();
+
+    }
+    public LiveData<Transaction> getTransactionById(long id) {
+        return repository.getTransactionById(id);
     }
 
     /**
@@ -51,4 +55,5 @@ public class TransactionViewModel extends AndroidViewModel {
     public void delete(Transaction transaction) {
         repository.delete(transaction);
     }
+
 }

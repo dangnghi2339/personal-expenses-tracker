@@ -2,19 +2,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/nav_rev_exp"
-        android:icon="@drawable/ic_rev_exp" android:title="Rev/Exp" />
+        android:id="@+id/nav_income_expense"
+        android:icon="@drawable/ic_rev_exp"
+        android:title="Thu/Chi" />
 
     <item
         android:id="@+id/nav_calendar"
-        android:icon="@drawable/ic_calendar" android:title="Calendar" />
+        android:icon="@drawable/ic_calendar"
+        android:title="Lịch" />
 
     <item
-        android:id="@+id/nav_enter_1"
-        android:icon="@drawable/ic_enter_1" android:title="Enter" />
+        android:id="@+id/nav_chart"
+        android:icon="@drawable/ic_chart"
+        android:title="Thống kê" />
 
     <item
-        android:id="@+id/nav_enter_2"
-        android:icon="@drawable/ic_enter_2" android:title="Enter" />
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="Cá nhân" />
 
 </menu>
