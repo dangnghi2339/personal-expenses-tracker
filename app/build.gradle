@@ -50,5 +50,5 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.7.7'
 
 //// Biểu đồ (Dùng cho Giai đoạn 2)
-//    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

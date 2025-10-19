@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData;
 import com.example.dack1.data.model.Transaction;
 import com.example.dack1.data.repository.TransactionRepository;
 import java.util.List;
-
+import com.example.dack1.data.model.CategorySum;
 /**
  * ViewModel cho các màn hình liên quan đến Transaction.
  * Nó cung cấp dữ liệu cho UI và xử lý các tương tác của người dùng.
@@ -38,7 +38,9 @@ public class TransactionViewModel extends AndroidViewModel {
     public LiveData<List<Transaction>> getAllTransactions() {
         return allTransactions;
     }
-
+    public LiveData<List<CategorySum>> getExpenseSumByCategory() {
+        return repository.getExpenseSumByCategory();
+    }
     /**
      * Ủy quyền thao tác chèn cho Repository.
      * Đây là phương thức mà UI sẽ gọi khi người dùng muốn lưu một giao dịch mới.

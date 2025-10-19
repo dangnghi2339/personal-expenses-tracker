@@ -12,6 +12,7 @@ import com.example.dack1.data.model.Transaction;
 
 import java.util.List;
 
+import com.example.dack1.data.model.CategorySum;
 /**
  * DAO (Data Access Object) cho bảng Transaction.
  * Interface này chứa tất cả các phương thức để thao tác với bảng 'transactions'.
@@ -60,5 +61,11 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE id = :id")
     LiveData<Transaction> getTransactionById(long id);
 
-
+    /**
+     * Query này tính tổng số tiền (SUM(amount)) cho mỗi category_id,
+     * chỉ áp dụng cho các giao dịch 'expense' (chi tiêu).
+     * Nó trả về một List<CategorySum>.
+     */
+    @Query("SELECT category_id AS categoryId, SUM(amount) as total FROM transactions WHERE type = 'expense' GROUP BY category_id")
+    LiveData<List<CategorySum>> getExpenseSumByCategory();
 }
