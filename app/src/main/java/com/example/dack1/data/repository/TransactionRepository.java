@@ -73,5 +73,11 @@ public class TransactionRepository {
             transactionDao.delete(transaction);
         });
     }
+    public LiveData<Double> getTotalIncomeForMonth(long startDate, long endDate) {
+        return transactionDao.getTotalIncomeForMonth(startDate, endDate);
+    }
 
+    public LiveData<Double> getTotalExpenseForMonth(long startDate, long endDate) {
+        return transactionDao.getTotalExpenseForMonth(startDate, endDate);
+    }
 }

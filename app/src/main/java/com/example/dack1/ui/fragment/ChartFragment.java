@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -63,6 +63,7 @@ public class ChartFragment extends Fragment {
     private void observeChartData() {
         // Gọi hàm mới mà chúng ta đã tạo
         transactionViewModel.getExpenseSumByCategory().observe(getViewLifecycleOwner(), categorySums -> {
+            Log.d("ChartFragment", "Observer được gọi! Số lượng categorySums: " + (categorySums != null ? categorySums.size() : "null")); // <-- Thêm dòng log
             if (categorySums != null && !categorySums.isEmpty()) {
                 // 5. Chuyển đổi List<CategorySum> thành List<PieEntry>
                 List<PieEntry> entries = new ArrayList<>();
@@ -78,7 +79,7 @@ public class ChartFragment extends Fragment {
                 dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
                 dataSet.setValueTextSize(14f);
                 dataSet.setValueTextColor(Color.BLACK);
-
+                Log.d("ChartFragment", "Đang cập nhật biểu đồ...");
                 // 7. Gán DataSet vào PieData
                 PieData pieData = new PieData(dataSet);
 
@@ -86,9 +87,11 @@ public class ChartFragment extends Fragment {
                 pieChart.setData(pieData);
                 pieChart.invalidate(); // Vẽ lại biểu đồ
             } else {
+                Log.d("ChartFragment", "Không có dữ liệu, đang xóa biểu đồ...");
                 // Nếu không có dữ liệu, xóa biểu đồ cũ
                 pieChart.clear();
                 pieChart.setCenterText("Không có dữ liệu chi tiêu");
+                pieChart.invalidate();
             }
         });
     }

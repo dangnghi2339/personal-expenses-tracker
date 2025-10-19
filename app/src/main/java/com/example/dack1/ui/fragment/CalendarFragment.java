@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.graphics.Color;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -23,7 +23,7 @@ import com.example.dack1.ui.adapter.CalendarAdapter;
 import com.example.dack1.ui.adapter.TransactionAdapter;
 import com.example.dack1.ui.view.EditTransactionActivity;
 import com.example.dack1.ui.viewmodel.TransactionViewModel;
-
+import java.text.NumberFormat; // Để format tiền tệ
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,7 +78,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         fetchTransactionsForDate(selectedDate);
 
         // 8. (Nợ kỹ thuật) Tải dữ liệu tóm tắt cho tháng
-        // fetchSummaryForMonth(selectedDate);
+         fetchSummaryForMonth(selectedDate);
     }
 
     private void initViews(View view) {
@@ -160,13 +160,13 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     private void previousMonthAction() {
         selectedDate.add(Calendar.MONTH, -1); // Lùi 1 tháng
         setMonthView(); // Vẽ lại lịch
-        // fetchSummaryForMonth(selectedDate); // (Nợ kỹ thuật)
+         fetchSummaryForMonth(selectedDate); // (Nợ kỹ thuật)
     }
 
     private void nextMonthAction() {
         selectedDate.add(Calendar.MONTH, 1); // Tăng 1 tháng
         setMonthView(); // Vẽ lại lịch
-        // fetchSummaryForMonth(selectedDate); // (Nợ kỹ thuật)
+         fetchSummaryForMonth(selectedDate); // (Nợ kỹ thuật)
     }
 
     /**
@@ -210,6 +210,69 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
                 .observe(getViewLifecycleOwner(), transactions -> {
                     transactionAdapter.submitList(transactions);
                 });
+    }
+    private void fetchSummaryForMonth(Calendar calendar) {
+        // 1. Tính timestamp đầu tháng (ngày 1, 00:00:00)
+        Calendar startOfMonth = (Calendar) calendar.clone();
+        startOfMonth.set(Calendar.DAY_OF_MONTH, 1);
+        startOfMonth.set(Calendar.HOUR_OF_DAY, 0);
+        startOfMonth.set(Calendar.MINUTE, 0);
+        startOfMonth.set(Calendar.SECOND, 0);
+        long startDate = startOfMonth.getTimeInMillis();
+
+        // 2. Tính timestamp cuối tháng (ngày cuối cùng, 23:59:59)
+        Calendar endOfMonth = (Calendar) calendar.clone();
+        endOfMonth.set(Calendar.DAY_OF_MONTH, endOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
+        endOfMonth.set(Calendar.HOUR_OF_DAY, 23);
+        endOfMonth.set(Calendar.MINUTE, 59);
+        endOfMonth.set(Calendar.SECOND, 59);
+        long endDate = endOfMonth.getTimeInMillis();
+
+        // 3. Observe tổng thu nhập
+        transactionViewModel.getTotalIncomeForMonth(startDate, endDate).observe(getViewLifecycleOwner(), totalIncome -> {
+            double income = (totalIncome != null) ? totalIncome : 0.0;
+            updateSummaryUI(income, -1); // -1 nghĩa là chưa có expense
+        });
+
+        // 4. Observe tổng chi tiêu
+        transactionViewModel.getTotalExpenseForMonth(startDate, endDate).observe(getViewLifecycleOwner(), totalExpense -> {
+            double expense = (totalExpense != null) ? totalExpense : 0.0;
+            updateSummaryUI(-1, expense); // -1 nghĩa là chưa có income
+        });
+    }
+
+    // Biến tạm để lưu trữ giá trị thu/chi
+    private double currentMonthIncome = -1;
+    private double currentMonthExpense = -1;
+
+    /**
+     * Cập nhật giao diện Tóm tắt tháng
+     * @param income Tổng thu (hoặc -1 nếu chưa có)
+     * @param expense Tổng chi (hoặc -1 nếu chưa có)
+     */
+    private void updateSummaryUI(double income, double expense) {
+        // Lưu lại giá trị mới
+        if (income != -1) currentMonthIncome = income;
+        if (expense != -1) currentMonthExpense = expense;
+
+        // Chỉ cập nhật UI khi cả hai giá trị đều đã có
+        if (currentMonthIncome != -1 && currentMonthExpense != -1) {
+            // Format tiền tệ VND
+            NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+
+            // Cập nhật TextViews
+            totalRevenueTextView.setText("+" + currencyFormatter.format(currentMonthIncome));
+            totalExpenditureTextView.setText("-" + currencyFormatter.format(currentMonthExpense));
+
+            double remaining = currentMonthIncome - currentMonthExpense;
+            remainingTextView.setText((remaining >= 0 ? "+" : "") + currencyFormatter.format(remaining));
+            // Đổi màu số dư nếu âm
+            remainingTextView.setTextColor(remaining >= 0 ? Color.parseColor("#4CAF50") : Color.RED); // Green or Red
+
+            // Reset biến tạm để chờ lần cập nhật tiếp theo
+            currentMonthIncome = -1;
+            currentMonthExpense = -1;
+        }
     }
 
     @Override

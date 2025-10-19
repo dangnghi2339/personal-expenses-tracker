@@ -48,6 +48,7 @@
     </TextView>
 
     <EditText
+        android:id="@+id/et_dialog_category_name"
         android:layout_width="360dp"
         android:layout_height="60dp"
         android:background="@drawable/rounded_editext"
@@ -86,6 +87,7 @@
         android:layout_marginTop="25dp">
 
         <LinearLayout
+            android:id="@+id/icon_rows_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">

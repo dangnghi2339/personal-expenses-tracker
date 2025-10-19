@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
  * Lớp này phải là abstract và kế thừa từ RoomDatabase.
  * @Database annotation khai báo tất cả các Entity thuộc về CSDL này và phiên bản của nó.
  */
-@Database(entities = {Transaction.class, Category.class, Budget.class}, version = 1, exportSchema = false)
+@Database(entities = {Transaction.class, Category.class, Budget.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     // Cung cấp các phương thức abstract để Room có thể tạo ra các DAO tương ứng.
@@ -52,6 +52,8 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "personal_expense_tracker_db")
+                            // THÊM DÒNG NÀY:
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }

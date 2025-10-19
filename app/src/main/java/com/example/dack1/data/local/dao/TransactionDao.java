@@ -67,7 +67,7 @@ public interface TransactionDao {
      * Nó trả về một List<CategorySum>.
      */
     @Query("SELECT category_id AS categoryId, SUM(amount) as total FROM transactions WHERE type = 'expense' GROUP BY category_id")
-    LiveData<List<CategorySum>> getExpenseSumByCategory();
+    LiveData<List<CategorySum>> getExpenseSumByCategory(); // <-- Phải là LiveData
 
     /**
      * Lấy tất cả giao dịch trong một khoảng timestamp (từ 00:00:00 ngày bắt đầu
@@ -75,4 +75,17 @@ public interface TransactionDao {
      */
     @Query("SELECT * FROM transactions WHERE transaction_date >= :startDate AND transaction_date <= :endDate ORDER BY transaction_date DESC")
     LiveData<List<Transaction>> getTransactionsByTimestampRange(long startDate, long endDate);
+    /**
+     * Tính tổng số tiền thu nhập ('income') trong một khoảng timestamp.
+     * Trả về LiveData<Double>, có thể là null nếu không có giao dịch nào.
+     */
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'income' AND transaction_date >= :startDate AND transaction_date <= :endDate")
+    LiveData<Double> getTotalIncomeForMonth(long startDate, long endDate);
+
+    /**
+     * Tính tổng số tiền chi tiêu ('expense') trong một khoảng timestamp.
+     * Trả về LiveData<Double>, có thể là null nếu không có giao dịch nào.
+     */
+    @Query("SELECT SUM(amount) FROM transactions WHERE type = 'expense' AND transaction_date >= :startDate AND transaction_date <= :endDate")
+    LiveData<Double> getTotalExpenseForMonth(long startDate, long endDate);
 }

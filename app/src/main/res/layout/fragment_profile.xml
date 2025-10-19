@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".ui.fragment.ProfileFragment">
 
     <TextView
+        android:id="@+id/tv_user_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Màn hình Cá nhân"
-        android:textSize="20sp" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:text="user@email.com"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:text="Đăng xuất"
+        android:textColor="@android:color/white" />
+    <Button
+        android:id="@+id/btn_manage_categories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_logout"
+        android:layout_marginBottom="16dp"
+        android:text="Quản lý Danh mục" />
+</RelativeLayout>

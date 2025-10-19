@@ -60,5 +60,11 @@ public class TransactionViewModel extends AndroidViewModel {
     public void delete(Transaction transaction) {
         repository.delete(transaction);
     }
+    public LiveData<Double> getTotalIncomeForMonth(long startDate, long endDate) {
+        return repository.getTotalIncomeForMonth(startDate, endDate);
+    }
 
+    public LiveData<Double> getTotalExpenseForMonth(long startDate, long endDate) {
+        return repository.getTotalExpenseForMonth(startDate, endDate);
+    }
 }

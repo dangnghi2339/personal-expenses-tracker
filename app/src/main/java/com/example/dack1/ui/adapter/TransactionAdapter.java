@@ -3,8 +3,8 @@ package com.example.dack1.ui.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
-// import android.widget.ImageButton; // Thêm dòng này nếu bạn dùng ImageButton
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
@@ -56,6 +56,7 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
     class TransactionViewHolder extends RecyclerView.ViewHolder {
         private final TextView descriptionTextView;
         private final TextView amountTextView;
+        private final ImageButton deleteButton;
         // TODO: Thêm nút xóa từ layout (ví dụ: iv_delete)
         // private final ImageButton deleteButton;
 
@@ -63,7 +64,8 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
             super(itemView);
             descriptionTextView = itemView.findViewById(R.id.textViewDescription);
             amountTextView = itemView.findViewById(R.id.textViewAmount);
-            // deleteButton = itemView.findViewById(R.id.iv_delete); // Ánh xạ nút xóa
+
+             deleteButton = itemView.findViewById(R.id.iv_delete); // Ánh xạ nút xóa
 
             // 3. GÁN SỰ KIỆN CLICK CHO TOÀN BỘ ITEM (ĐỂ SỬA)
             itemView.setOnClickListener(v -> {
@@ -73,16 +75,13 @@ public class TransactionAdapter extends ListAdapter<Transaction, TransactionAdap
                 }
             });
 
-            // 4. GÁN SỰ KIỆN CLICK CHO NÚT XÓA (ĐỂ XÓA)
-            // (Bỏ comment khối này khi bạn đã thêm nút Xóa vào layout)
-            /*
             deleteButton.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (deleteClickListener != null && position != RecyclerView.NO_POSITION) {
+                    // Gọi listener trong Fragment, truyền Transaction cần xóa
                     deleteClickListener.onDeleteClick(getItem(position));
                 }
             });
-            */
         }
     }
 
