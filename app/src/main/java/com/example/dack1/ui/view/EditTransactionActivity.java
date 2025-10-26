@@ -1,56 +1,68 @@
 package com.example.dack1.ui.view;
 
 import android.app.DatePickerDialog;
+import android.content.Intent; // Thêm import Intent
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log; // Import Log
-import android.widget.ArrayAdapter; // Import ArrayAdapter
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;      // Import Spinner
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager; // Thêm import GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView;     // Thêm import RecyclerView
 
 import com.example.dack1.R;
-import com.example.dack1.data.model.Category; // Import Category
+import com.example.dack1.data.model.Category;
 import com.example.dack1.data.model.Transaction;
-import com.example.dack1.ui.viewmodel.CategoryViewModel; // Import CategoryViewModel
+import com.example.dack1.ui.adapter.CategoryGridAdapter; // Thêm import CategoryGridAdapter
+import com.example.dack1.ui.viewmodel.CategoryViewModel;
 import com.example.dack1.ui.viewmodel.TransactionViewModel;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;   // Import ArrayList
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;        // Import List
+import java.util.List;
 import java.util.Locale;
 
 public class EditTransactionActivity extends AppCompatActivity {
 
     private TransactionViewModel transactionViewModel;
-    private CategoryViewModel categoryViewModel; // ViewModel cho danh mục
+    private CategoryViewModel categoryViewModel;
 
-    // Views từ layout "activity_add_transaction.xml" (tái sử dụng)
+    // --- Views ---
     private EditText inputDate;
     private EditText inputAmount;
     private EditText inputNote;
-    private Button btnSave; // Sẽ đổi tên thành "Update"
-    private Spinner spinnerCategory; // Spinner cho danh mục
+    private Button btnSave;
+    private RadioGroup rgTransactionType;
+    private RadioButton rbExpense, rbIncome;
+    private RecyclerView rvCategoryGrid;      // Thay Spinner bằng RecyclerView
+    private Button btnEditCategories;       // Nút Edit mới
 
     private Calendar myCalendar = Calendar.getInstance();
 
-    // Biến xử lý dữ liệu
-    private Transaction currentTransaction; // Giao dịch đang được sửa
+    // --- Adapter & Data ---
+    private Transaction currentTransaction;
     private long transactionId = -1;
-    private List<Category> categoryList = new ArrayList<>(); // Danh sách các danh mục có sẵn
-    private ArrayAdapter<String> categoryAdapter; // Adapter cho spinner
-    private boolean isDataLoaded = false; // Cờ để tránh load dữ liệu nhiều lần
+    private List<Category> categoryList = new ArrayList<>(); // List danh mục đã lọc theo type
+    private List<Category> allCategories = new ArrayList<>();  // List tất cả danh mục
+    private CategoryGridAdapter categoryGridAdapter; // Adapter mới cho RecyclerView
+    private long selectedCategoryIdFromGrid = -1; // ID category được chọn từ lưới
+    private boolean isDataLoaded = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Tái sử dụng layout từ AddTransactionActivity
+        // Tái sử dụng layout đã được cập nhật
         setContentView(R.layout.activity_add_transaction);
 
         // Khởi tạo ViewModels
@@ -62,59 +74,83 @@ public class EditTransactionActivity extends AppCompatActivity {
         inputAmount = findViewById(R.id.inputB);
         inputNote = findViewById(R.id.editText1);
         btnSave = findViewById(R.id.btnsave);
-        spinnerCategory = findViewById(R.id.spinner_category); // Ánh xạ Spinner
+        rgTransactionType = findViewById(R.id.rg_transaction_type);
+        rbExpense = findViewById(R.id.rb_expense);
+        rbIncome = findViewById(R.id.rb_income);
+        rvCategoryGrid = findViewById(R.id.rv_category_grid); // Ánh xạ RecyclerView
+        btnEditCategories = findViewById(R.id.btn_edit_categories); // Ánh xạ nút Edit mới
 
         // Cài đặt các thành phần UI
         setupDatePicker();
-        setupCategorySpinner(); // Cài đặt adapter cho spinner
+        setupCategoryGrid(); // Cài đặt RecyclerView thay vì Spinner
+        setupTransactionTypeListener(); // Giữ nguyên listener đổi màu và lọc
+
+        // Cập nhật Placeholder
+        inputAmount.setHint("Enter the amount");
+        inputNote.setHint("Enter notes");
+        inputDate.setHint("Select date");
 
         // Lấy Transaction ID từ Intent
         transactionId = getIntent().getLongExtra("TRANSACTION_ID", -1);
 
-        // Kiểm tra ID hợp lệ
         if (transactionId == -1) {
             Toast.makeText(this, "Lỗi: Không tìm thấy giao dịch", Toast.LENGTH_SHORT).show();
-            finish(); // Đóng Activity nếu không có ID
+            finish();
             return;
         }
 
-        // Observe danh sách Category trước để đổ dữ liệu vào spinner
+        // Observe danh sách Category trước
         observeCategories();
 
-        // Đổi chữ nút Save thành Update và gán sự kiện click
-        btnSave.setText("Update expense");
+        // Gán sự kiện cho nút Edit Categories
+        btnEditCategories.setOnClickListener(v -> {
+            startActivity(new Intent(this, CostalActivity.class));
+            // Không finish()
+        });
+
+        // Gán sự kiện click cho nút Update
+        // Chữ trên nút sẽ được cập nhật trong setupTransactionTypeListener
         btnSave.setOnClickListener(v -> updateTransaction());
     }
 
     /**
-     * Cài đặt ArrayAdapter cho Spinner danh mục.
+     * Cài đặt CategoryGridAdapter cho RecyclerView.
      */
-    private void setupCategorySpinner() {
-        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<>());
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(categoryAdapter);
+    private void setupCategoryGrid() {
+        categoryGridAdapter = new CategoryGridAdapter();
+
+        // Lắng nghe khi người dùng chọn category trên lưới
+        categoryGridAdapter.setOnCategorySelectedListener(categoryId -> {
+            selectedCategoryIdFromGrid = categoryId;
+            Log.d("EditTransactionActivity", "Category selected: " + categoryId); // Log để kiểm tra
+        });
+
+        // Thiết lập GridLayoutManager với 3 cột (hoặc số khác tùy ý)
+        rvCategoryGrid.setLayoutManager(new GridLayoutManager(this, 3));
+        rvCategoryGrid.setAdapter(categoryGridAdapter);
+        rvCategoryGrid.setNestedScrollingEnabled(false); // Có thể cần nếu layout phức tạp
     }
 
+
     /**
-     * Lắng nghe LiveData danh sách Category từ ViewModel và cập nhật Spinner.
-     * Sau khi danh sách Category được tải, gọi hàm để tải dữ liệu Transaction.
+     * Lắng nghe LiveData danh sách Category từ ViewModel.
+     * Khi có dữ liệu, lưu lại và gọi loadTransactionData.
      */
     private void observeCategories() {
+        // Chỉ observe một lần duy nhất
+        if (categoryViewModel.getAllCategories().hasObservers()) return;
+
         categoryViewModel.getAllCategories().observe(this, categories -> {
             if (categories != null) {
-                categoryList = categories; // Lưu lại danh sách Category đầy đủ
-                List<String> categoryNames = new ArrayList<>();
-                for (Category cat : categories) {
-                    categoryNames.add(cat.getName()); // Chỉ lấy tên để hiển thị
+                Log.d("EditTransactionActivity", "Categories observed: " + categories.size());
+                allCategories = categories;
+                // Quan trọng: Chỉ gọi loadTransactionData SAU KHI đã có danh sách categories
+                // Đồng thời phải đảm bảo chỉ load 1 lần duy nhất
+                if (!isDataLoaded) {
+                    loadTransactionData();
                 }
-                // Cập nhật Spinner
-                categoryAdapter.clear();
-                categoryAdapter.addAll(categoryNames);
-                categoryAdapter.notifyDataSetChanged();
-
-                // Quan trọng: Chỉ gọi loadTransactionData SAU KHI spinner đã có dữ liệu category
-                // để đảm bảo có thể setSelection chính xác trong populateUi
-                loadTransactionData();
+            } else {
+                Log.w("EditTransactionActivity", "Observed categories list is null");
             }
         });
     }
@@ -124,28 +160,38 @@ public class EditTransactionActivity extends AppCompatActivity {
      * Chỉ gọi populateUi một lần khi dữ liệu hợp lệ được trả về.
      */
     private void loadTransactionData() {
+        // Chỉ observe một lần duy nhất
+        if (transactionViewModel.getTransactionById(transactionId).hasObservers()) return;
+
         transactionViewModel.getTransactionById(transactionId).observe(this, transaction -> {
             // Chỉ đổ dữ liệu lên UI lần đầu tiên và khi transaction khác null
             if (transaction != null && !isDataLoaded) {
+                Log.d("EditTransactionActivity", "Transaction data loaded: ID " + transaction.getId());
                 currentTransaction = transaction;
                 populateUi(transaction); // Đổ dữ liệu lên các trường input
-                isDataLoaded = true; // Đánh dấu đã load xong để tránh gọi lại populateUi
+                isDataLoaded = true; // Đánh dấu đã load xong
             } else if (transaction == null && !isDataLoaded) {
                 // Xử lý trường hợp không tìm thấy transaction ngay lần đầu
                 Log.e("EditTransactionActivity", "Transaction với ID " + transactionId + " không tồn tại.");
                 Toast.makeText(this, "Lỗi: Không tải được chi tiết giao dịch", Toast.LENGTH_SHORT).show();
                 finish(); // Đóng nếu không tìm thấy
             }
-            // Không cần làm gì nếu transaction là null sau khi isDataLoaded=true (có thể do bị xóa)
+            // Bỏ observe sau khi đã load thành công hoặc xác nhận không tìm thấy
+            if (isDataLoaded || transaction == null) {
+                transactionViewModel.getTransactionById(transactionId).removeObservers(this);
+            }
         });
     }
 
-
     /**
-     * Đổ dữ liệu từ Transaction đã tải lên các trường EditText và Spinner.
+     * Đổ dữ liệu từ Transaction đã tải lên các trường EditText và RecyclerView.
      */
     private void populateUi(Transaction transaction) {
-        if (transaction == null) return; // Kiểm tra an toàn
+        if (transaction == null) {
+            Log.e("EditTransactionActivity", "populateUi called with null transaction");
+            return; // Kiểm tra an toàn
+        }
+        Log.d("EditTransactionActivity", "Populating UI for transaction ID: " + transaction.getId());
 
         // Đổ dữ liệu vào EditTexts
         inputAmount.setText(String.valueOf(transaction.getAmount()));
@@ -155,91 +201,164 @@ public class EditTransactionActivity extends AppCompatActivity {
         myCalendar.setTimeInMillis(transaction.getTransactionDate());
         updateLabel(); // Cập nhật EditText ngày
 
-        // Tìm và chọn Category cũ trong Spinner
-        long oldCategoryId = transaction.getCategoryId();
-        int spinnerPosition = -1;
-        for (int i = 0; i < categoryList.size(); i++) {
-            if (categoryList.get(i).getId() == oldCategoryId) {
-                spinnerPosition = i;
-                break;
-            }
-        }
-        // Set selection cho Spinner nếu tìm thấy vị trí
-        if (spinnerPosition != -1) {
-            spinnerCategory.setSelection(spinnerPosition);
+        // --- QUAN TRỌNG: Set RadioGroup TRƯỚC khi gọi filter ---
+        // Set transaction type in RadioGroup (sẽ trigger listener và gọi filter)
+        if ("income".equalsIgnoreCase(transaction.getType())) {
+            rgTransactionType.check(R.id.rb_income);
         } else {
-            // Xử lý nếu Category cũ không còn tồn tại trong danh sách
-            Log.w("EditTransactionActivity", "Không tìm thấy Category cũ ID: " + oldCategoryId + " trong Spinner. Kích thước list: " + categoryList.size());
-            // Chọn item đầu tiên làm mặc định nếu danh sách không rỗng
-            if (!categoryList.isEmpty()) {
-                spinnerCategory.setSelection(0);
-                Toast.makeText(this, "Danh mục cũ không còn, chọn mặc định.", Toast.LENGTH_SHORT).show();
-            } else {
-                // Trường hợp không có category nào trong DB
-                Toast.makeText(this, "Lỗi: Không có danh mục nào để chọn.", Toast.LENGTH_SHORT).show();
-            }
+            rgTransactionType.check(R.id.rb_expense);
         }
+        // Listener của RadioGroup SẼ TỰ ĐỘNG gọi filterCategoriesByType()
+
+
+        // --- Highlight Category cũ ---
+        // Đoạn code này cần chạy SAU KHI filterCategoriesByType() đã chạy (do listener trigger)
+        // Dùng post để đảm bảo RecyclerView đã cập nhật xong danh sách
+        rvCategoryGrid.post(() -> {
+            long oldCategoryId = transaction.getCategoryId();
+            selectedCategoryIdFromGrid = oldCategoryId; // Cập nhật biến lưu ID
+            categoryGridAdapter.setSelectedCategoryId(oldCategoryId); // Yêu cầu Adapter highlight
+            Log.d("EditTransactionActivity", "Attempting to highlight category ID: " + oldCategoryId);
+            // Kiểm tra xem ID có tồn tại trong list không
+            boolean found = false;
+            for(Category cat : categoryList) {
+                if(cat.getId() == oldCategoryId) {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) {
+                Log.w("EditTransactionActivity", "Old category ID " + oldCategoryId + " not found in the filtered list.");
+                // Có thể hiển thị Toast hoặc chọn mặc định item đầu tiên nếu muốn
+                // selectedCategoryIdFromGrid = -1; // Reset nếu không tìm thấy
+                // categoryGridAdapter.setSelectedCategoryId(-1);
+            }
+        });
     }
 
     /**
-     * Xử lý logic khi bấm nút "Update expense".
-     * Lấy dữ liệu mới, validate, cập nhật đối tượng currentTransaction và gọi ViewModel.
+     * Lọc danh sách category dựa trên loại giao dịch đang được chọn (Income/Expense)
+     * và cập nhật RecyclerView.
+     */
+    private void filterCategoriesByType() {
+        String selectedType = getSelectedTransactionType();
+        categoryList.clear(); // Xóa list tạm thời
+
+        Log.d("EditTransactionActivity", "Filtering categories for type: " + selectedType + ". Total categories: " + allCategories.size());
+
+        for (Category cat : allCategories) {
+            if (selectedType.equalsIgnoreCase(cat.getType())) {
+                categoryList.add(cat);
+            }
+        }
+        Log.d("EditTransactionActivity", "Filtered list size: " + categoryList.size());
+
+        // Submit danh sách đã lọc cho Adapter của RecyclerView
+        // Tạo bản sao để tránh ListAdapter sửa đổi list gốc
+        categoryGridAdapter.submitList(new ArrayList<>(categoryList));
+
+        // Reset lựa chọn category trong Adapter (UI highlight) khi đổi type
+        // Biến selectedCategoryIdFromGrid sẽ được cập nhật lại khi người dùng bấm chọn
+        // Hoặc trong populateUi khi load dữ liệu cũ
+        categoryGridAdapter.setSelectedCategoryId(-1);
+        selectedCategoryIdFromGrid = -1; // Cũng reset biến lưu trữ của Activity
+    }
+
+    /**
+     * Xử lý logic khi bấm nút "Update".
      */
     private void updateTransaction() {
-        // Kiểm tra xem dữ liệu gốc đã được load chưa
         if (currentTransaction == null) {
             Toast.makeText(this, "Lỗi: Dữ liệu giao dịch gốc chưa sẵn sàng.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Lấy dữ liệu mới từ các trường input
         String amountStr = inputAmount.getText().toString().trim();
         String note = inputNote.getText().toString().trim();
-        int selectedPosition = spinnerCategory.getSelectedItemPosition();
 
         // --- VALIDATION ---
         if (TextUtils.isEmpty(amountStr)) {
             Toast.makeText(this, "Vui lòng nhập Số tiền", Toast.LENGTH_SHORT).show();
             return;
         }
-        // Kiểm tra Spinner hợp lệ
-        if (selectedPosition < 0 || selectedPosition >= categoryList.size()) {
-            Toast.makeText(this, "Vui lòng chọn một danh mục hợp lệ", Toast.LENGTH_SHORT).show();
+        // Kiểm tra xem category đã được chọn từ lưới chưa
+        if (selectedCategoryIdFromGrid == -1) {
+            Toast.makeText(this, "Vui lòng chọn một danh mục", Toast.LENGTH_SHORT).show();
             return;
         }
 
         // --- TRY UPDATING ---
         try {
-            // Chuyển đổi dữ liệu
             double amount = Double.parseDouble(amountStr);
-            long timestamp = myCalendar.getTimeInMillis(); // Lấy timestamp đã được cập nhật (nếu người dùng đổi ngày)
-            long selectedCategoryId = categoryList.get(selectedPosition).getId(); // Lấy ID của Category mới
+            long timestamp = myCalendar.getTimeInMillis();
+            long categoryIdToSave = selectedCategoryIdFromGrid; // Lấy ID từ biến đã lưu
+            String transactionType = getSelectedTransactionType();
 
-            // Cập nhật đối tượng currentTransaction với dữ liệu mới
+            // Cập nhật đối tượng currentTransaction
             currentTransaction.setAmount(amount);
             currentTransaction.setDescription(note);
             currentTransaction.setTransactionDate(timestamp);
-            currentTransaction.setCategoryId(selectedCategoryId); // <-- Cập nhật Category ID mới
-            // currentTransaction.setType(...); // Cập nhật Type nếu bạn thêm UI cho nó
+            currentTransaction.setCategoryId(categoryIdToSave); // Cập nhật Category ID mới
+            currentTransaction.setType(transactionType); // Cập nhật Type
 
-            // Gọi ViewModel để cập nhật vào database
+            // Gọi ViewModel để cập nhật
             transactionViewModel.update(currentTransaction);
 
-            // Thông báo và đóng Activity
             Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show();
             finish();
 
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
-        } catch (IndexOutOfBoundsException e) {
-            // Phòng trường hợp lỗi khi lấy category từ list
-            Toast.makeText(this, "Lỗi: Không thể lấy thông tin danh mục đã chọn.", Toast.LENGTH_SHORT).show();
-            Log.e("EditTransactionActivity", "Lỗi IndexOutOfBoundsException khi lấy category đã chọn", e);
         }
     }
 
-    // --- Các hàm Helper cho DatePicker (Giống AddTransactionActivity) ---
 
+    // --- Listener cho RadioGroup (Đã bao gồm đổi màu) ---
+    private void setupTransactionTypeListener() {
+        rgTransactionType.setOnCheckedChangeListener((group, checkedId) -> {
+            // Lấy màu từ resources
+            int selectedColor = ContextCompat.getColor(this, R.color.colorPrimary); // Màu xanh đậm
+            int unselectedColorBg = Color.parseColor("#D5E7FE"); // Màu xanh nhạt
+            int whiteColor = Color.WHITE; // Màu trắng
+
+            if (checkedId == R.id.rb_income) {
+                // Khi chọn Income
+                rbIncome.setBackgroundTintList(ColorStateList.valueOf(selectedColor));
+                rbIncome.setTextColor(whiteColor);
+                rbExpense.setBackgroundTintList(ColorStateList.valueOf(unselectedColorBg));
+                rbExpense.setTextColor(selectedColor);
+                btnSave.setText("Update Income"); // Cập nhật text nút
+            } else { // checkedId == R.id.rb_expense
+                // Khi chọn Expense
+                rbExpense.setBackgroundTintList(ColorStateList.valueOf(selectedColor));
+                rbExpense.setTextColor(whiteColor);
+                rbIncome.setBackgroundTintList(ColorStateList.valueOf(unselectedColorBg));
+                rbIncome.setTextColor(selectedColor);
+                btnSave.setText("Update expense"); // Cập nhật text nút
+            }
+
+            // Trigger lọc danh mục KHI CÓ DỮ LIỆU categories
+            if (!allCategories.isEmpty()) {
+                filterCategoriesByType();
+            } else {
+                Log.w("EditTransactionActivity","Cannot filter yet, allCategories is empty.");
+                // Nếu chưa có allCategories, observeCategories sẽ tự gọi filter sau
+            }
+        });
+    }
+
+    // --- Hàm lấy loại giao dịch đã chọn ---
+    private String getSelectedTransactionType() {
+        int checkedId = rgTransactionType.getCheckedRadioButtonId();
+        if (checkedId == R.id.rb_income) {
+            return "income";
+        } else {
+            return "expense";
+        }
+    }
+
+
+    // --- Các hàm Helper cho DatePicker (Giữ nguyên) ---
     private void setupDatePicker() {
         DatePickerDialog.OnDateSetListener dateSetListener = (view, year, month, dayOfMonth) -> {
             myCalendar.set(Calendar.YEAR, year);
@@ -254,13 +373,12 @@ public class EditTransactionActivity extends AppCompatActivity {
                     myCalendar.get(Calendar.MONTH),
                     myCalendar.get(Calendar.DAY_OF_MONTH)).show();
         });
-        // Ngăn người dùng gõ tay vào ô ngày tháng
         inputDate.setFocusable(false);
         inputDate.setFocusableInTouchMode(false);
     }
 
     private void updateLabel() {
-        String myFormat = "dd/MM/yyyy"; // Định dạng ngày tháng
+        String myFormat = "dd/MM/yyyy";
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         inputDate.setText(sdf.format(myCalendar.getTime()));
     }

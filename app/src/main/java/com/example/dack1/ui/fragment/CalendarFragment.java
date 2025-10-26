@@ -18,22 +18,28 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.dack1.R;
+import com.example.dack1.data.model.Category;
 import com.example.dack1.data.model.Transaction;
+import com.example.dack1.data.model.DailySummary;
 import com.example.dack1.ui.adapter.CalendarAdapter;
 import com.example.dack1.ui.adapter.TransactionAdapter;
 import com.example.dack1.ui.view.EditTransactionActivity;
+import com.example.dack1.ui.viewmodel.CategoryViewModel;
 import com.example.dack1.ui.viewmodel.TransactionViewModel;
 import java.text.NumberFormat; // Để format tiền tệ
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class CalendarFragment extends Fragment implements CalendarAdapter.OnItemListener,
         TransactionAdapter.OnItemClickListener, TransactionAdapter.OnDeleteClickListener {
 
     // View Models & Adapters
     private TransactionViewModel transactionViewModel;
+    private CategoryViewModel categoryViewModel;
     private TransactionAdapter transactionAdapter;
     private CalendarAdapter calendarAdapter;
 
@@ -42,9 +48,11 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     private ImageView backArrow, forwardArrow;
     private RecyclerView calendarRecyclerView, transactionRecyclerView;
     private TextView totalRevenueTextView, totalExpenditureTextView, remainingTextView;
+    private TextView tvEmptyCalendarTransactions;
 
     // Biến quản lý ngày tháng
     private Calendar selectedDate;
+    private Map<String, DailySummary> dailySummaries;
 
     @Nullable
     @Override
@@ -64,10 +72,10 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
 
         // 3. Khởi tạo ViewModel
         transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-
+        categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
         // 4. Cài đặt RecyclerView cho danh sách giao dịch (ở dưới)
         setupTransactionRecyclerView();
-
+        observeCategories();
         // 5. Cài đặt RecyclerView cho Lịch (ở trên)
         setMonthView();
 
@@ -77,8 +85,9 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         // 7. Tải dữ liệu cho ngày hôm nay khi mới mở
         fetchTransactionsForDate(selectedDate);
 
-        // 8. (Nợ kỹ thuật) Tải dữ liệu tóm tắt cho tháng
-         fetchSummaryForMonth(selectedDate);
+        // 8. Tải dữ liệu tóm tắt cho tháng
+        fetchSummaryForMonth(selectedDate);
+        observeDailySummaries(selectedDate);
     }
 
     private void initViews(View view) {
@@ -92,6 +101,7 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         totalRevenueTextView = view.findViewById(R.id.totalRevenueTextView);
         totalExpenditureTextView = view.findViewById(R.id.totalExpenditureTextView);
         remainingTextView = view.findViewById(R.id.remainingTextView);
+        tvEmptyCalendarTransactions = view.findViewById(R.id.tv_empty_calendar_transactions);
     }
 
     private void setupClickListeners() {
@@ -112,6 +122,12 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
 
         // 3. Tạo Adapter
         calendarAdapter = new CalendarAdapter(daysInMonth, this);
+        calendarAdapter.setCurrentMonth(selectedDate);
+        
+        // Pass daily summaries to adapter if available
+        if (dailySummaries != null) {
+            calendarAdapter.setDailySummaries(dailySummaries);
+        }
 
         // 4. Cài đặt RecyclerView Lịch
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 7);
@@ -160,13 +176,15 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
     private void previousMonthAction() {
         selectedDate.add(Calendar.MONTH, -1); // Lùi 1 tháng
         setMonthView(); // Vẽ lại lịch
-         fetchSummaryForMonth(selectedDate); // (Nợ kỹ thuật)
+        fetchSummaryForMonth(selectedDate);
+        observeDailySummaries(selectedDate);
     }
 
     private void nextMonthAction() {
         selectedDate.add(Calendar.MONTH, 1); // Tăng 1 tháng
         setMonthView(); // Vẽ lại lịch
-         fetchSummaryForMonth(selectedDate); // (Nợ kỹ thuật)
+        fetchSummaryForMonth(selectedDate);
+        observeDailySummaries(selectedDate);
     }
 
     /**
@@ -209,6 +227,15 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         transactionViewModel.getTransactionsByTimestampRange(startDate, endDate)
                 .observe(getViewLifecycleOwner(), transactions -> {
                     transactionAdapter.submitList(transactions);
+                    
+                    // Show/hide empty state
+                    if (transactions == null || transactions.isEmpty()) {
+                        transactionRecyclerView.setVisibility(View.GONE);
+                        tvEmptyCalendarTransactions.setVisibility(View.VISIBLE);
+                    } else {
+                        transactionRecyclerView.setVisibility(View.VISIBLE);
+                        tvEmptyCalendarTransactions.setVisibility(View.GONE);
+                    }
                 });
     }
     private void fetchSummaryForMonth(Calendar calendar) {
@@ -229,15 +256,43 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
         long endDate = endOfMonth.getTimeInMillis();
 
         // 3. Observe tổng thu nhập
+        transactionViewModel.getTotalIncomeForMonth(startDate, endDate).removeObservers(getViewLifecycleOwner());
         transactionViewModel.getTotalIncomeForMonth(startDate, endDate).observe(getViewLifecycleOwner(), totalIncome -> {
             double income = (totalIncome != null) ? totalIncome : 0.0;
             updateSummaryUI(income, -1); // -1 nghĩa là chưa có expense
         });
 
         // 4. Observe tổng chi tiêu
+        transactionViewModel.getTotalExpenseForMonth(startDate, endDate).removeObservers(getViewLifecycleOwner());
         transactionViewModel.getTotalExpenseForMonth(startDate, endDate).observe(getViewLifecycleOwner(), totalExpense -> {
             double expense = (totalExpense != null) ? totalExpense : 0.0;
             updateSummaryUI(-1, expense); // -1 nghĩa là chưa có income
+        });
+    }
+
+    private void observeDailySummaries(Calendar calendar) {
+        // Calculate start and end dates for the month
+        Calendar startOfMonth = (Calendar) calendar.clone();
+        startOfMonth.set(Calendar.DAY_OF_MONTH, 1);
+        startOfMonth.set(Calendar.HOUR_OF_DAY, 0);
+        startOfMonth.set(Calendar.MINUTE, 0);
+        startOfMonth.set(Calendar.SECOND, 0);
+        long startDate = startOfMonth.getTimeInMillis();
+
+        Calendar endOfMonth = (Calendar) calendar.clone();
+        endOfMonth.set(Calendar.DAY_OF_MONTH, endOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
+        endOfMonth.set(Calendar.HOUR_OF_DAY, 23);
+        endOfMonth.set(Calendar.MINUTE, 59);
+        endOfMonth.set(Calendar.SECOND, 59);
+        long endDate = endOfMonth.getTimeInMillis();
+
+        transactionViewModel.getDailySummariesForMonth(startDate, endDate).removeObservers(getViewLifecycleOwner());
+        transactionViewModel.getDailySummariesForMonth(startDate, endDate).observe(getViewLifecycleOwner(), summaries -> {
+            dailySummaries = summaries;
+            // Update calendar adapter with new summaries
+            if (calendarAdapter != null) {
+                calendarAdapter.setDailySummaries(dailySummaries);
+            }
         });
     }
 
@@ -274,6 +329,34 @@ public class CalendarFragment extends Fragment implements CalendarAdapter.OnItem
             currentMonthExpense = -1;
         }
     }
+    /**
+     * Lắng nghe danh sách Category và cung cấp cho TransactionAdapter.
+     */
+    private void observeCategories() {
+        // Lắng nghe LiveData từ CategoryViewModel
+        categoryViewModel.getAllCategories().observe(getViewLifecycleOwner(), categories -> {
+            // Kiểm tra xem danh sách categories và adapter đã sẵn sàng chưa
+            if (categories != null && transactionAdapter != null) {
+                // Tạo một Map để lưu trữ Category theo ID
+                Map<Long, Category> categoryMap = new HashMap<>();
+                // Duyệt qua danh sách categories và đưa vào Map
+                for (Category category : categories) {
+                    categoryMap.put(category.getId(), category);
+                }
+                // Gọi hàm setCategoryMap của TransactionAdapter để cung cấp dữ liệu
+                transactionAdapter.setCategoryMap(categoryMap);
+                // Bạn có thể thêm Log để kiểm tra nếu muốn:
+                // Log.d("CalendarFragment", "Category map set to adapter. Size: " + categoryMap.size());
+            } else {
+                // Log lỗi nếu cần:
+                // Log.w("CalendarFragment", "Categories list is null or transactionAdapter not ready");
+            }
+        });
+    }
+
+
+
+
 
     @Override
     public void onItemClick(Transaction transaction) {

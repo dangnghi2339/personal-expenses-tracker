@@ -37,4 +37,8 @@ public interface CategoryDao {
     // (Hàm cũ của bạn, không cần thiết nữa nếu dùng getCategoryById)
     // @Query("SELECT name FROM categories WHERE id = :id")
     // String getNamecate(int id);
+
+    // Tìm theo tên để kiểm tra trùng lặp
+    @Query("SELECT * FROM categories WHERE name = :name LIMIT 1")
+    LiveData<Category> findByName(String name);
 }

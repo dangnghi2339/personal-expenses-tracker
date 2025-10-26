@@ -7,7 +7,11 @@ import androidx.lifecycle.LiveData;
 import com.example.dack1.data.model.Transaction;
 import com.example.dack1.data.repository.TransactionRepository;
 import java.util.List;
+import java.util.Map;
 import com.example.dack1.data.model.CategorySum;
+import com.example.dack1.data.model.CategoryNameSum;
+import com.example.dack1.data.model.MonthlySummary;
+import com.example.dack1.data.model.DailySummary;
 /**
  * ViewModel cho các màn hình liên quan đến Transaction.
  * Nó cung cấp dữ liệu cho UI và xử lý các tương tác của người dùng.
@@ -38,8 +42,8 @@ public class TransactionViewModel extends AndroidViewModel {
     public LiveData<List<Transaction>> getAllTransactions() {
         return allTransactions;
     }
-    public LiveData<List<CategorySum>> getExpenseSumByCategory() {
-        return repository.getExpenseSumByCategory();
+    public LiveData<List<CategoryNameSum>> getExpenseSumByCategoryName() {
+        return repository.getExpenseSumByCategoryName();
     }
     public LiveData<List<Transaction>> getTransactionsByTimestampRange(long startDate, long endDate) {
         return repository.getTransactionsByTimestampRange(startDate, endDate);
@@ -66,5 +70,13 @@ public class TransactionViewModel extends AndroidViewModel {
 
     public LiveData<Double> getTotalExpenseForMonth(long startDate, long endDate) {
         return repository.getTotalExpenseForMonth(startDate, endDate);
+    }
+
+    public LiveData<List<MonthlySummary>> getMonthlySummaries(long startDate) {
+        return repository.getMonthlySummaries(startDate);
+    }
+
+    public LiveData<Map<String, DailySummary>> getDailySummariesForMonth(long startDate, long endDate) {
+        return repository.getDailySummariesForMonth(startDate, endDate);
     }
 }

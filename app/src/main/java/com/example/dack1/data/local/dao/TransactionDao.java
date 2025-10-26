@@ -11,8 +11,12 @@ import androidx.room.Update;
 import com.example.dack1.data.model.Transaction;
 
 import java.util.List;
+import java.util.Map;
 
 import com.example.dack1.data.model.CategorySum;
+import com.example.dack1.data.model.CategoryNameSum;
+import com.example.dack1.data.model.MonthlySummary;
+import com.example.dack1.data.model.DailySummary;
 /**
  * DAO (Data Access Object) cho bảng Transaction.
  * Interface này chứa tất cả các phương thức để thao tác với bảng 'transactions'.
@@ -66,8 +70,8 @@ public interface TransactionDao {
      * chỉ áp dụng cho các giao dịch 'expense' (chi tiêu).
      * Nó trả về một List<CategorySum>.
      */
-    @Query("SELECT category_id AS categoryId, SUM(amount) as total FROM transactions WHERE type = 'expense' GROUP BY category_id")
-    LiveData<List<CategorySum>> getExpenseSumByCategory(); // <-- Phải là LiveData
+    @Query("SELECT c.name AS categoryName, SUM(t.amount) AS total FROM transactions t INNER JOIN categories c ON t.category_id = c.id WHERE t.type = 'expense' GROUP BY c.name")
+    LiveData<List<CategoryNameSum>> getExpenseSumByCategoryName(); // <-- Phải là LiveData
 
     /**
      * Lấy tất cả giao dịch trong một khoảng timestamp (từ 00:00:00 ngày bắt đầu
@@ -88,4 +92,48 @@ public interface TransactionDao {
      */
     @Query("SELECT SUM(amount) FROM transactions WHERE type = 'expense' AND transaction_date >= :startDate AND transaction_date <= :endDate")
     LiveData<Double> getTotalExpenseForMonth(long startDate, long endDate);
+
+    /**
+     * Lấy tổng thu nhập và chi tiêu theo tháng cho 12 tháng gần nhất.
+     */
+    @Query("SELECT " +
+           "strftime('%Y-%m', datetime(transaction_date/1000, 'unixepoch')) AS monthYear, " +
+           "SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS totalIncome, " +
+           "SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS totalExpense " +
+           "FROM transactions " +
+           "WHERE transaction_date >= :startDate " +
+           "GROUP BY strftime('%Y-%m', datetime(transaction_date/1000, 'unixepoch')) " +
+           "ORDER BY monthYear DESC " +
+           "LIMIT 12")
+    LiveData<List<MonthlySummary>> getMonthlySummaries(long startDate);
+
+    /**
+     * Lấy tổng thu nhập và chi tiêu theo ngày trong một tháng.
+     * Trả về Map với key là "yyyy-MM-dd" và value là DailySummary.
+     */
+    @Query("SELECT " +
+            // SỬA: Thêm ', 'localtime'' vào strftime
+            "strftime('%Y-%m-%d', datetime(transaction_date/1000, 'unixepoch', 'localtime')) AS date, " +
+            "SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) AS totalIncome, " +
+            "SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) AS totalExpense " +
+            "FROM transactions " +
+            "WHERE transaction_date >= :startDate AND transaction_date <= :endDate " +
+            // SỬA: Thêm ', 'localtime'' vào strftime ở GROUP BY
+            "GROUP BY strftime('%Y-%m-%d', datetime(transaction_date/1000, 'unixepoch', 'localtime'))")
+    LiveData<List<DailySummaryWithDate>> getDailySummariesForMonth(long startDate, long endDate);
+
+    /**
+     * Đếm số giao dịch đang sử dụng một category cụ thể.
+     */
+    @Query("SELECT COUNT(*) FROM transactions WHERE category_id = :categoryId")
+    LiveData<Integer> getTransactionCountByCategoryId(long categoryId);
+
+    /**
+     * Helper class for daily summaries with date.
+     */
+    class DailySummaryWithDate {
+        public String date;
+        public double totalIncome;
+        public double totalExpense;
+    }
 }

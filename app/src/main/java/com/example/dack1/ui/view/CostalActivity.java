@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,6 +41,7 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
     private CategoryAdapter categoryAdapter;
     private RecyclerView rvCategories;
     private FloatingActionButton fabAddCategory;
+    private TextView tvEmptyCategories;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,6 +50,7 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
 
         rvCategories = findViewById(R.id.rv_categories);
         fabAddCategory = findViewById(R.id.fab_add_category);
+        tvEmptyCategories = findViewById(R.id.tv_empty_categories);
 
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
 
@@ -65,6 +69,15 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
     private void observeCategories() {
         categoryViewModel.getAllCategories().observe(this, categories -> {
             categoryAdapter.submitList(categories);
+            
+            // Show/hide empty state
+            if (categories == null || categories.isEmpty()) {
+                rvCategories.setVisibility(View.GONE);
+                tvEmptyCategories.setVisibility(View.VISIBLE);
+            } else {
+                rvCategories.setVisibility(View.VISIBLE);
+                tvEmptyCategories.setVisibility(View.GONE);
+            }
         });
     }
 
@@ -78,13 +91,21 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
     @Override
     public void onDeleteClick(Category category) {
         new AlertDialog.Builder(this)
-                .setTitle("Xác nhận xóa")
-                .setMessage("Bạn có chắc muốn xóa danh mục '" + category.getName() + "'?")
-                .setPositiveButton("Xóa", (dialog, which) -> {
-                    categoryViewModel.delete(category);
-                    Toast.makeText(this, "Đã xóa!", Toast.LENGTH_SHORT).show();
+                .setTitle(getString(R.string.confirm_delete))
+                .setMessage(getString(R.string.confirm_delete_category, category.getName()))
+                .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
+                    // Check if any transactions use this category
+                    categoryViewModel.getTransactionCountByCategoryId(category.getId())
+                            .observe(this, count -> {
+                                if (count != null && count > 0) {
+                                    Toast.makeText(this, getString(R.string.cannot_delete_category_in_use), Toast.LENGTH_LONG).show();
+                                } else {
+                                    categoryViewModel.delete(category);
+                                    Toast.makeText(this, getString(R.string.category_deleted), Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 })
-                .setNegativeButton("Hủy", null)
+                .setNegativeButton(getString(R.string.cancel), null)
                 .show();
     }
 
@@ -106,6 +127,7 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
         final EditText etCategoryName = dialogView.findViewById(R.id.et_dialog_category_name);
         final Button btnSave = dialogView.findViewById(R.id.btnsave);
         final ImageButton btnBack = dialogView.findViewById(R.id.imageButton12);
+        final RadioGroup rgCategoryType = dialogView.findViewById(R.id.rg_category_type);
 
         // --- Reset state ---
         selectedIconName = null;
@@ -124,10 +146,20 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
             selectedIconName = categoryToEdit.getIconName(); // SỬA: Dùng getIconName()
             selectedColorHex = categoryToEdit.getColor();    // Dùng getColor()
             btnSave.setText("Cập nhật");
+            
+            // Set category type in RadioGroup
+            if ("income".equalsIgnoreCase(categoryToEdit.getType())) {
+                rgCategoryType.check(R.id.rb_income);
+            } else {
+                rgCategoryType.check(R.id.rb_expense);
+            }
+            
             highlightSavedSelections(dialogView, selectedIconName, selectedColorHex); // Highlight lựa chọn cũ
         } else {
             builder.setTitle("Thêm danh mục mới");
             btnSave.setText("Save catalog");
+            // Default to expense
+            rgCategoryType.check(R.id.rb_expense);
         }
 
         AlertDialog dialog = builder.create();
@@ -136,35 +168,49 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
         btnSave.setOnClickListener(v -> {
             String categoryName = etCategoryName.getText().toString().trim();
 
-            if (TextUtils.isEmpty(categoryName)) {
-                Toast.makeText(this, "Tên danh mục không được để trống", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (selectedIconName == null) {
-                Toast.makeText(this, "Vui lòng chọn một icon", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (selectedColorHex == null) {
-                Toast.makeText(this, "Vui lòng chọn một màu", Toast.LENGTH_SHORT).show();
-                return;
-            }
+                        if (TextUtils.isEmpty(categoryName)) {
+                            Toast.makeText(this, getString(R.string.category_name_required), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (selectedIconName == null) {
+                            Toast.makeText(this, getString(R.string.select_icon), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (selectedColorHex == null) {
+                            Toast.makeText(this, getString(R.string.select_color), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
 
-            String categoryType = "expense"; // Mặc định là chi tiêu
+            // Get selected category type from RadioGroup
+            String categoryType = getSelectedCategoryType(rgCategoryType);
 
             if (categoryToEdit != null) { // Chế độ Sửa
-                categoryToEdit.setName(categoryName);
-                categoryToEdit.setType(categoryType);
-                categoryToEdit.setIconName(selectedIconName); // SỬA: Dùng setIconName()
-                categoryToEdit.setColor(selectedColorHex);    // Dùng setColor()
-                categoryViewModel.update(categoryToEdit);
-                Toast.makeText(this, "Đã cập nhật!", Toast.LENGTH_SHORT).show();
+                // Pre-check duplicate name (excluding current id)
+                categoryViewModel.findByName(categoryName).observe(this, existing -> {
+                    if (existing != null && existing.getId() != categoryToEdit.getId()) {
+                        Toast.makeText(this, getString(R.string.category_name_exists), Toast.LENGTH_SHORT).show();
+                    } else {
+                        categoryToEdit.setName(categoryName);
+                        categoryToEdit.setType(categoryType);
+                        categoryToEdit.setIconName(selectedIconName);
+                        categoryToEdit.setColor(selectedColorHex);
+                        categoryViewModel.update(categoryToEdit);
+                        Toast.makeText(this, getString(R.string.category_updated), Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                });
             } else { // Chế độ Thêm mới
-                // SỬA: Gọi đúng constructor Category(name, type, iconName, color)
-                Category newCategory = new Category(categoryName, categoryType, selectedIconName, selectedColorHex);
-                categoryViewModel.insert(newCategory);
-                Toast.makeText(this, "Đã thêm!", Toast.LENGTH_SHORT).show();
+                categoryViewModel.findByName(categoryName).observe(this, existing -> {
+                    if (existing != null) {
+                        Toast.makeText(this, getString(R.string.category_name_exists), Toast.LENGTH_SHORT).show();
+                    } else {
+                        Category newCategory = new Category(categoryName, categoryType, selectedIconName, selectedColorHex);
+                        categoryViewModel.insert(newCategory);
+                        Toast.makeText(this, getString(R.string.category_added), Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                });
             }
-            dialog.dismiss();
         });
 
         // --- Xử lý nút Back ---
@@ -173,6 +219,15 @@ public class CostalActivity extends AppCompatActivity implements CategoryAdapter
         }
 
         dialog.show();
+    }
+
+    private String getSelectedCategoryType(RadioGroup rgCategoryType) {
+        int checkedId = rgCategoryType.getCheckedRadioButtonId();
+        if (checkedId == R.id.rb_income) {
+            return "income";
+        } else {
+            return "expense";
+        }
     }
 
 

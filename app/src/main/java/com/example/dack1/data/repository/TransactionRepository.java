@@ -6,7 +6,13 @@ import com.example.dack1.data.local.dao.TransactionDao;
 import com.example.dack1.data.local.database.AppDatabase;
 import com.example.dack1.data.model.Transaction;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import com.example.dack1.data.model.CategorySum;
+import com.example.dack1.data.model.CategoryNameSum;
+import com.example.dack1.data.model.MonthlySummary;
+import com.example.dack1.data.model.DailySummary;
+import com.example.dack1.data.local.dao.TransactionDao;
 
 /**
  * Repository quản lý dữ liệu cho Transaction.
@@ -43,8 +49,8 @@ public class TransactionRepository {
     public LiveData<Transaction> getTransactionById(long id) {
         return transactionDao.getTransactionById(id);
     }
-    public LiveData<List<CategorySum>> getExpenseSumByCategory() {
-        return transactionDao.getExpenseSumByCategory();
+    public LiveData<List<CategoryNameSum>> getExpenseSumByCategoryName() {
+        return transactionDao.getExpenseSumByCategoryName();
     }
     public LiveData<List<Transaction>> getTransactionsByTimestampRange(long startDate, long endDate) {
         return transactionDao.getTransactionsByTimestampRange(startDate, endDate);
@@ -79,5 +85,24 @@ public class TransactionRepository {
 
     public LiveData<Double> getTotalExpenseForMonth(long startDate, long endDate) {
         return transactionDao.getTotalExpenseForMonth(startDate, endDate);
+    }
+
+    public LiveData<List<MonthlySummary>> getMonthlySummaries(long startDate) {
+        return transactionDao.getMonthlySummaries(startDate);
+    }
+
+    public LiveData<Map<String, DailySummary>> getDailySummariesForMonth(long startDate, long endDate) {
+        return androidx.lifecycle.Transformations.map(
+            transactionDao.getDailySummariesForMonth(startDate, endDate),
+            dailySummaryWithDates -> {
+                Map<String, DailySummary> dailySummaries = new HashMap<>();
+                if (dailySummaryWithDates != null) {
+                    for (TransactionDao.DailySummaryWithDate item : dailySummaryWithDates) {
+                        dailySummaries.put(item.date, new DailySummary(item.totalIncome, item.totalExpense));
+                    }
+                }
+                return dailySummaries;
+            }
+        );
     }
 }

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
+import com.example.dack1.data.local.dao.TransactionDao;
 import com.example.dack1.data.local.dao.CategoryDao;
 import com.example.dack1.data.local.database.AppDatabase;
 import com.example.dack1.data.model.Category;
@@ -13,11 +14,13 @@ import java.util.List;
 public class CategoryRepository {
 
     private CategoryDao categoryDao;
+    private TransactionDao transactionDao;
     private LiveData<List<Category>> allCategories;
 
     public CategoryRepository(Application application) {
         AppDatabase database = AppDatabase.getDatabase((Context) application);
         categoryDao = database.categoryDao();
+        transactionDao = database.transactionDao();
         allCategories = categoryDao.getAllCategories();
     }
 
@@ -49,5 +52,13 @@ public class CategoryRepository {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             categoryDao.delete(category);
         });
+    }
+
+    public LiveData<Integer> getTransactionCountByCategoryId(long categoryId) {
+        return transactionDao.getTransactionCountByCategoryId(categoryId);
+    }
+
+    public LiveData<Category> findByName(String name) {
+        return categoryDao.findByName(name);
     }
 }

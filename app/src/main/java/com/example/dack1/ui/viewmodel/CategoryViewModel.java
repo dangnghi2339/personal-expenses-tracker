@@ -41,4 +41,12 @@ public class CategoryViewModel extends AndroidViewModel {
     public void delete(Category category) {
         repository.delete(category);
     }
+
+    public LiveData<Integer> getTransactionCountByCategoryId(long categoryId) {
+        return repository.getTransactionCountByCategoryId(categoryId);
+    }
+
+    public LiveData<Category> findByName(String name) {
+        return repository.findByName(name);
+    }
 }
