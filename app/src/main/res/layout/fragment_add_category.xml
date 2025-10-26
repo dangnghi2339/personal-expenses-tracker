@@ -133,16 +133,6 @@
             android:useDefaultMargins="true"
             android:layout_marginTop="16dp">
 
-            <ImageButton
-                android:src="@drawable/ic_market"
-                style="@style/IconSelectionButton"/>
-            <ImageButton
-                android:src="@drawable/ic_eat_drink"
-                style="@style/IconSelectionButton"/>
-            <ImageButton
-                android:src="@drawable/ic_shopping"
-                style="@style/IconSelectionButton"/>
-
         </GridLayout>
 
             <TextView
@@ -161,9 +151,6 @@
                 android:useDefaultMargins="true"
                 android:layout_marginTop="16dp">
 
-                <View
-                    android:background="@color/black"
-                    style="@style/ColorCircle"/>
             </GridLayout>
 
         </LinearLayout>
