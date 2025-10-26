@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Moneyme</string>
+
+    <!-- Onboarding / Auth -->
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="login_here">Đăng nhập</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="already_have_account">Đã có tài khoản</string>
+    <string name="email">Email</string>
+    <string name="username">Tên người dùng</string>
+    <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="sign_in">Đăng nhập</string>
+    <string name="sign_up">Đăng ký</string>
+    <string name="forgot_password_q">Quên mật khẩu?</string>
+    <string name="or">Hoặc</string>
+    <string name="login_with_facebook">Đăng nhập bằng Facebook</string>
+    <string name="login_with_google">Đăng nhập bằng Google</string>
+
+    <!-- Individual -->
+    <string name="money">Tiền tệ</string>
+    <string name="notification">Thông báo</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="turn_on">Bật</string>
+    <string name="turn_off">Tắt</string>
+    <string name="vietnamese">Tiếng Việt</string>
+    <string name="english">Tiếng Anh</string>
+
+    <!-- Notification screen -->
+    <string name="allow_notifications">Cho phép thông báo</string>
+
+    <!-- Currency labels -->
+    <string name="usd_usdollar">USD — Đô la Mỹ</string>
+    <string name="eur_euro">EUR — Euro</string>
+    <string name="vnd_vietnamese_dong">VND — Việt Nam Đồng</string>
+    <string name="jpy_yen">JPY — Yên Nhật</string>
+    <string name="gbp_pound">GBP — Bảng Anh</string>
+    <string name="krw_won">KRW — Won Hàn Quốc</string>
+    <string name="cny_yuan">CNY — Nhân dân tệ</string>
+    <string name="aud_audollar">AUD — Đô la Úc</string>
+    <string name="cad_cadollar">CAD — Đô la Canada</string>
+    <string name="sgd_sgdollar">SGD — Đô la Singapore</string>
+</resources>
