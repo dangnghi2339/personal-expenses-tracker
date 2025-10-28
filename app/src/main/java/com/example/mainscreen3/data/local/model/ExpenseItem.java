@@ -1,4 +1,8 @@
-package com.example.mainscreen3;
+package com.example.mainscreen3.data.local.model;
+
+import com.example.mainscreen3.R;
+
+import java.io.Serializable;
 
 public class ExpenseItem {
     public static final String TYPE_EXPENSE = "EXPENSE";
@@ -11,9 +15,10 @@ public class ExpenseItem {
     private String type;
     private int iconResource;
     private int colorResource;
+    private boolean isCustomCategory;
 
     // Constructor
-    public ExpenseItem(String category, double amount, String note, String date, String type, int iconResource, int colorResource) {
+    public ExpenseItem(String category, double amount, String note, String date, String type, int iconResource, int colorResource, boolean isCustomCategory) {
         this.category = category;
         this.amount = amount;
         this.note = note;
@@ -21,6 +26,7 @@ public class ExpenseItem {
         this.type = type;
         this.iconResource = iconResource;
         this.colorResource = colorResource;
+        this.isCustomCategory = isCustomCategory;
     }
 
     public String getCategory() { return category; }
@@ -61,4 +67,5 @@ public class ExpenseItem {
         return R.drawable.ic_default;
     }
     public int getColorResource() { return colorResource; }
+    public boolean isCustomCategory() { return isCustomCategory; }
 }

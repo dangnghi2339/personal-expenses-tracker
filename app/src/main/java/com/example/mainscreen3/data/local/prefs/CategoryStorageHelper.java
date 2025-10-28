@@ -1,8 +1,9 @@
-package com.example.mainscreen3;
+package com.example.mainscreen3.data.local.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.example.mainscreen3.data.local.model.CategoryModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -16,7 +17,7 @@ public class CategoryStorageHelper {
     private static final Gson gson = new Gson();
 
     // Hàm LƯU danh sách
-    public static void saveCategories(Context context, List<CategoryModel> categories) {
+    public void saveCategories(Context context, List<CategoryModel> categories) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
@@ -28,7 +29,7 @@ public class CategoryStorageHelper {
     }
 
     // Hàm TẢI danh sách
-    public static List<CategoryModel> loadCategories(Context context) {
+    public List<CategoryModel> loadCategories(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String json = prefs.getString(KEY_CATEGORIES, null);
 

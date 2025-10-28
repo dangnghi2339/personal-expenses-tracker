@@ -1,4 +1,4 @@
-package com.example.mainscreen3;
+package com.example.mainscreen3.ui.fragment;
 
 import android.os.Bundle;
 import android.view.Gravity;
@@ -13,15 +13,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.example.mainscreen3.ui.viewmodel.CategoryViewModel;
+import com.example.mainscreen3.util.OnCategoryAddedListener;
+import com.example.mainscreen3.R;
+import com.example.mainscreen3.data.local.model.CategoryModel;
+import com.example.mainscreen3.data.local.model.ExpenseItem;
 
 public class AddCategoryFragment extends DialogFragment {
 
@@ -32,25 +34,19 @@ public class AddCategoryFragment extends DialogFragment {
     private Button btnSave;
     private ImageView ivIconPreview;
 
-    // Biến để theo dõi lựa chọn
     private int selectedIconResId = 0;
     private int selectedColorResId = 0;
     private View currentlySelectedIconView = null;
     private View currentlySelectedColorView = null;
     private TextView tvTitleAdd, tvTitleFix, btnDeleteCategory;
     private CategoryModel categoryToEdit = null;
-    private OnCategoryAddedListener listener;
-
+    private CategoryViewModel categoryViewModel;
     private final int[] MOCK_ICON_IDS = new int[]{
             R.drawable.ic_credit_card, R.drawable.ic_eat_drink, R.drawable.ic_shopping,
             R.drawable.ic_gasoline, R.drawable.ic_electricity, R.drawable.ic_house,
             R.drawable.ic_load_phone, R.drawable.ic_school, R.drawable.ic_market,
-            R.drawable.ic_pet,
-            R.drawable.ic_travel,
-            R.drawable.ic_health,
-            R.drawable.ic_sport,
-            R.drawable.ic_beauty,
-            R.drawable.ic_movie,
+            R.drawable.ic_pet, R.drawable.ic_travel, R.drawable.ic_health,
+            R.drawable.ic_sport, R.drawable.ic_beauty, R.drawable.ic_movie,
             R.drawable.ic_transport
     };
 
@@ -78,6 +74,7 @@ public class AddCategoryFragment extends DialogFragment {
         if (getArguments() != null && getArguments().containsKey("EDIT_CATEGORY_MODEL")) {
             categoryToEdit = (CategoryModel) getArguments().getSerializable("EDIT_CATEGORY_MODEL");
         }
+        categoryViewModel = new ViewModelProvider(requireActivity()).get(CategoryViewModel.class);
     }
 
     @Override
@@ -216,8 +213,8 @@ public class AddCategoryFragment extends DialogFragment {
     }
 
     private void deleteCategory() {
-        if (listener != null && categoryToEdit != null) {
-            listener.onCategoryDeleted(categoryToEdit);
+        if (categoryToEdit != null) {
+            categoryViewModel.deleteCategory(categoryToEdit);
         }
         dismiss();
     }
@@ -244,17 +241,11 @@ public class AddCategoryFragment extends DialogFragment {
                 categoryToEdit.getType() :
                 (getArguments() != null ? getArguments().getString("CATEGORY_TYPE", ExpenseItem.TYPE_EXPENSE) : ExpenseItem.TYPE_EXPENSE);
 
-        CategoryModel savedCategory = new CategoryModel(name, selectedIconResId, newCategoryType, selectedColorResId);
+        CategoryModel savedCategory = new CategoryModel(name, selectedIconResId, newCategoryType, selectedColorResId, true);
 
-        if (listener != null) {
-            listener.onCategorySaved(savedCategory, categoryToEdit);
-        }
+        categoryViewModel.saveCategory(savedCategory, categoryToEdit);
 
         dismiss();
-    }
-
-    public void setOnCategoryAddedListener(OnCategoryAddedListener listener) {
-        this.listener = listener;
     }
 
     private void updateIconPreviewColor() {

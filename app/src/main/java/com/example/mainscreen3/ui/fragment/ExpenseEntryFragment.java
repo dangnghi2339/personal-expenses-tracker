@@ -1,8 +1,10 @@
-package com.example.mainscreen3;
+package com.example.mainscreen3.ui.fragment;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,15 +19,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.example.mainscreen3.data.local.prefs.CategoryStorageHelper;
+import com.example.mainscreen3.R;
+import com.example.mainscreen3.data.local.model.CategoryModel;
+import com.example.mainscreen3.data.local.model.ExpenseItem;
+import com.example.mainscreen3.ui.viewmodel.CategoryViewModel;
+import com.example.mainscreen3.ui.viewmodel.MainViewModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +38,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class ExpenseEntryFragment extends DialogFragment implements CategoryEditFragment.OnCategoryRelayListener{
+public class ExpenseEntryFragment extends DialogFragment {
 
     private TextView tvSelectedDate;
     private EditText etAmount, etNote;
@@ -50,12 +55,8 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
     private List<LinearLayout> expenseCategoryViews;
     private List<LinearLayout> revenueCategoryViews;
     private Button btnSave;
-
-    public interface OnExpenseSavedListener {
-        void onExpenseSaved(ExpenseItem item);
-    }
-
-    private OnExpenseSavedListener listener;
+    private MainViewModel mainViewModel;
+    private CategoryViewModel categoryViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,7 +74,11 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        categoryViewModel = new ViewModelProvider(requireActivity()).get(CategoryViewModel.class);
+
         tvSelectedDate = view.findViewById(R.id.tv_selected_date);
+        updateDateDisplay();
         etAmount = view.findViewById(R.id.et_amount);
         etNote = view.findViewById(R.id.et_note);
 
@@ -88,118 +93,112 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
         layoutExpenseCategories = view.findViewById(R.id.layout_expense_categories);
         layoutRevenueCategories = view.findViewById(R.id.layout_revenue_categories);
 
-        expenseCategoryViews = findCategoryViews(layoutExpenseCategories);
-        revenueCategoryViews = findCategoryViews(layoutRevenueCategories);
+        expenseCategoryViews = new ArrayList<>();
+        revenueCategoryViews = new ArrayList<>();
 
-        loadCustomCategories();
+        currentTransactionType = categoryViewModel.currentCategoryType.getValue() != null ?
+                categoryViewModel.currentCategoryType.getValue() : ExpenseItem.TYPE_EXPENSE;
+        switchTransactionTypeUI(currentTransactionType);
 
-        setupCategoryListeners(expenseCategoryViews);
-        setupCategoryListeners(revenueCategoryViews);
-
-        switchTransactionType(currentTransactionType);
+        setupCategoryObserver();
 
         tvSelectedDate.setOnClickListener(v -> showDatePickerDialog());
-        btnPrevDay.setOnClickListener(v -> { /* ... */ });
-        btnNextDay.setOnClickListener(v -> { /* ... */ });
+        btnPrevDay.setOnClickListener(v -> {
+            currentCalendar.add(Calendar.DAY_OF_YEAR, -1);
+            updateDateDisplay();
+        });
+        btnNextDay.setOnClickListener(v -> {
+            currentCalendar.add(Calendar.DAY_OF_YEAR, 1);
+            updateDateDisplay();
+        });
 
-        btnExpenditure.setOnClickListener(v -> switchTransactionType(ExpenseItem.TYPE_EXPENSE));
-        btnRevenue.setOnClickListener(v -> switchTransactionType(ExpenseItem.TYPE_REVENUE));
+        btnExpenditure.setOnClickListener(v -> categoryViewModel.loadCategoriesByType(ExpenseItem.TYPE_EXPENSE));
+        btnRevenue.setOnClickListener(v -> categoryViewModel.loadCategoriesByType(ExpenseItem.TYPE_REVENUE));
 
         btnSave.setOnClickListener(v -> saveExpense());
         btnEditCategories.setOnClickListener(v -> openCategoryEditScreen());
     }
 
-    private void loadCustomCategories() {
+    private void setupCategoryObserver() {
+        categoryViewModel.currentCategoryType.observe(getViewLifecycleOwner(), type -> {
+            switchTransactionTypeUI(type);
+        });
+
+        categoryViewModel.filteredCategories.observe(getViewLifecycleOwner(), categories -> {
+
+            populateCategoryGrid(categories);
+        });
+    }
+
+    private void populateCategoryGrid(List<CategoryModel> categories) {
+        ViewGroup targetGrid;
+        List<LinearLayout> targetViewList;
+
+        if (currentTransactionType.equals(ExpenseItem.TYPE_EXPENSE)) {
+            targetGrid = (ViewGroup) layoutExpenseCategories;
+            targetViewList = expenseCategoryViews;
+            targetViewList.clear();
+        } else {
+            targetGrid = (ViewGroup) layoutRevenueCategories;
+            targetViewList = revenueCategoryViews;
+            targetViewList.clear();
+        }
+
+        targetGrid.removeAllViews();
+
+        if (categories.isEmpty()) {
+
+            return;
+        }
+
+        for (CategoryModel model : categories) {
+            LinearLayout categoryView = createNewCategoryView(model);
+            targetGrid.addView(categoryView);
+            targetViewList.add(categoryView);
+
+            categoryView.setOnClickListener(v -> {
+                CategoryModel clickedModel = (CategoryModel) v.getTag();
+                handleCategorySelection(v, clickedModel.getName(), clickedModel.getIconResource(), clickedModel.getColorResource());
+            });
+        }
+
+        if (!targetViewList.isEmpty()) {
+            View firstCategory = targetViewList.get(0);
+            CategoryModel firstModel = (CategoryModel) firstCategory.getTag();
+            handleCategorySelection(firstCategory, firstModel.getName(), firstModel.getIconResource(), firstModel.getColorResource());
+        } else {
+            selectedCategory = null;
+            selectedIconResId = 0;
+            selectedColorResId = 0;
+            currentlySelectedCategoryView = null;
+        }
+    }
+
+    private void switchTransactionTypeUI(String type) {
+        currentTransactionType = type;
+
         if (getContext() == null) return;
 
-        // Tải danh sách đã lưu
-        List<CategoryModel> customCategories = CategoryStorageHelper.loadCategories(getContext());
+        if (ExpenseItem.TYPE_EXPENSE.equals(type)) {
+            btnExpenditure.setBackgroundTintList(getResources().getColorStateList(R.color.colorPrimary, getContext().getTheme()));
+            btnExpenditure.setTextColor(getResources().getColor(android.R.color.white, getContext().getTheme()));
+            btnRevenue.setBackgroundTintList(getResources().getColorStateList(android.R.color.white, getContext().getTheme()));
+            btnRevenue.setTextColor(getResources().getColor(R.color.colorPrimary, getContext().getTheme()));
 
-        for (CategoryModel model : customCategories) {
-            // Tạo View mới (dùng hàm bạn đã có)
-            LinearLayout newCategoryView = createNewCategoryView(model);
-
-            // Thêm View vào Layout tương ứng
-            if (model.getType().equals(ExpenseItem.TYPE_EXPENSE)) {
-                if (layoutExpenseCategories instanceof ViewGroup) {
-                    ((ViewGroup) layoutExpenseCategories).addView(newCategoryView);
-                    expenseCategoryViews.add(newCategoryView); // Quan trọng: Thêm vào danh sách theo dõi
-                }
-            } else { // REVENUE
-                if (layoutRevenueCategories instanceof ViewGroup) {
-                    ((ViewGroup) layoutRevenueCategories).addView(newCategoryView);
-                    revenueCategoryViews.add(newCategoryView); // Quan trọng: Thêm vào danh sách theo dõi
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof OnExpenseSavedListener) {
-            listener = (OnExpenseSavedListener) context;
+            layoutExpenseCategories.setVisibility(View.VISIBLE);
+            layoutRevenueCategories.setVisibility(View.GONE);
+            btnSave.setText("Save expenses");
         } else {
-            throw new ClassCastException(context.toString() + " must implement OnExpenseSavedListener");
-        }
-    }
+            btnRevenue.setBackgroundTintList(getResources().getColorStateList(R.color.colorPrimary, getContext().getTheme()));
+            btnRevenue.setTextColor(getResources().getColor(android.R.color.white, getContext().getTheme()));
+            btnExpenditure.setBackgroundTintList(getResources().getColorStateList(android.R.color.white, getContext().getTheme()));
+            btnExpenditure.setTextColor(getResources().getColor(R.color.colorPrimary, getContext().getTheme()));
 
-    @Override
-    public void onNewCategoryCreated(CategoryModel newCategory) {
-        onNewCategoryAdded(newCategory);
-    }
-
-    @Override
-    public void onCategoryDeleted(CategoryModel deletedCategory) {
-        if (!isAdded()) return;
-
-        View viewToDelete = null;
-
-        // Tìm View cần xóa trong danh sách Chi
-        for (LinearLayout view : expenseCategoryViews) {
-            Object tag = view.getTag();
-            if (tag instanceof CategoryModel && ((CategoryModel)tag).equals(deletedCategory)) {
-                viewToDelete = view;
-                break;
-            }
+            layoutExpenseCategories.setVisibility(View.GONE);
+            layoutRevenueCategories.setVisibility(View.VISIBLE);
+            btnSave.setText("Save the revenue");
         }
 
-        // Nếu không thấy, tìm trong danh sách Thu
-        if (viewToDelete == null) {
-            for (LinearLayout view : revenueCategoryViews) {
-                Object tag = view.getTag();
-                if (tag instanceof CategoryModel && ((CategoryModel)tag).equals(deletedCategory)) {
-                    viewToDelete = view;
-                    break;
-                }
-            }
-        }
-
-        // Nếu tìm thấy View, hãy xóa nó
-        if (viewToDelete != null) {
-            // Xóa khỏi layout
-            ((ViewGroup) viewToDelete.getParent()).removeView(viewToDelete);
-
-            // Xóa khỏi danh sách theo dõi
-            expenseCategoryViews.remove(viewToDelete);
-            revenueCategoryViews.remove(viewToDelete);
-
-            // Nếu nó đang được chọn, reset về cái đầu tiên
-            if (currentlySelectedCategoryView == viewToDelete) {
-                switchTransactionType(currentTransactionType);
-            }
-        }
-    }
-
-    @Override
-    public void onCategoryEdited(CategoryModel updatedCategory, CategoryModel oldCategory) {
-        // Cách đơn giản nhất: Xóa cái cũ đi và Thêm cái mới vào
-
-        // 1. Xóa View cũ
-        onCategoryDeleted(oldCategory);
-
-        // 2. Thêm View mới
-        onNewCategoryAdded(updatedCategory);
     }
 
     private void openCategoryEditScreen() {
@@ -208,8 +207,6 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
         }
 
         CategoryEditFragment categoryEditFragment = new CategoryEditFragment();
-
-        categoryEditFragment.setOnCategoryRelayListener(this);
 
         try {
             categoryEditFragment.show(getParentFragmentManager(), CategoryEditFragment.TAG);
@@ -235,57 +232,6 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
     private void updateDateDisplay() {
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
         tvSelectedDate.setText(sdf.format(currentCalendar.getTime()));
-    }
-
-    private void switchTransactionType(String type) {
-        currentTransactionType = type;
-
-        if (ExpenseItem.TYPE_EXPENSE.equals(type)) {
-            btnExpenditure.setBackgroundTintList(getResources().getColorStateList(R.color.colorPrimary));
-            btnExpenditure.setTextColor(getResources().getColor(android.R.color.white));
-            btnRevenue.setBackgroundTintList(getResources().getColorStateList(android.R.color.white));
-            btnRevenue.setTextColor(getResources().getColor(R.color.colorPrimary));
-
-            layoutExpenseCategories.setVisibility(View.VISIBLE);
-            layoutRevenueCategories.setVisibility(View.GONE);
-            btnSave.setText("Save expenses");
-
-            if (!expenseCategoryViews.isEmpty()) {
-                View firstCategory = expenseCategoryViews.get(0);
-                Object tag = firstCategory.getTag();
-
-                if (tag instanceof CategoryModel) {
-                    CategoryModel model = (CategoryModel) tag;
-                    handleCategorySelection(firstCategory, model.getName(), model.getIconResource(), model.getColorResource());
-                } else if (tag instanceof String) {
-                    String name = (String) tag;
-                    handleCategorySelection(firstCategory, name, 0, 0);
-                }
-            }
-        } else {
-
-            btnRevenue.setBackgroundTintList(getResources().getColorStateList(R.color.colorPrimary));
-            btnRevenue.setTextColor(getResources().getColor(android.R.color.white));
-            btnExpenditure.setBackgroundTintList(getResources().getColorStateList(android.R.color.white));
-            btnExpenditure.setTextColor(getResources().getColor(R.color.colorPrimary));
-
-            layoutExpenseCategories.setVisibility(View.GONE);
-            layoutRevenueCategories.setVisibility(View.VISIBLE);
-            btnSave.setText("Save the revenue");
-
-            if (!revenueCategoryViews.isEmpty()) {
-                View firstCategory = revenueCategoryViews.get(0);
-                Object tag = firstCategory.getTag();
-
-                if (tag instanceof CategoryModel) {
-                    CategoryModel model = (CategoryModel) tag;
-                    handleCategorySelection(firstCategory, model.getName(), model.getIconResource(), model.getColorResource());
-                } else if (tag instanceof String) {
-                    String name = (String) tag;
-                    handleCategorySelection(firstCategory, name, 0, 0);
-                }
-            }
-        }
     }
 
     private void handleCategorySelection(View newSelectionView, String categoryName, int iconResId, int colorResId) {
@@ -334,24 +280,6 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
         }
         return categoryViews;
     }
-    private void setupCategoryListeners(List<LinearLayout> categoryViews) {
-        for (LinearLayout categoryView : categoryViews) {
-            categoryView.setOnClickListener(v -> {
-
-                Object tag = v.getTag();
-
-                if (tag instanceof CategoryModel) {
-                    CategoryModel model = (CategoryModel) tag;
-                    handleCategorySelection(v, model.getName(), model.getIconResource(), model.getColorResource());
-
-                } else if (tag instanceof String) {
-                    String categoryName = (String) tag;
-                    handleCategorySelection(v, categoryName, 0, 0);
-                }
-            });
-        }
-    }
-
     private void saveExpense() {
         String amountStr = etAmount.getText().toString();
         String note = etNote.getText().toString();
@@ -369,7 +297,10 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
 
         try {
             double amount = Double.parseDouble(amountStr);
-
+            boolean isCustom = false;
+            if (currentlySelectedCategoryView != null && currentlySelectedCategoryView.getTag() instanceof CategoryModel) {
+                isCustom = ((CategoryModel) currentlySelectedCategoryView.getTag()).isCustom();
+            }
             ExpenseItem newItem = new ExpenseItem(
                     selectedCategory,
                     amount,
@@ -377,12 +308,11 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
                     date,
                     currentTransactionType,
                     selectedIconResId,
-                    selectedColorResId
+                    selectedColorResId,
+                    isCustom
             );
 
-            if (listener != null) {
-                listener.onExpenseSaved(newItem);
-            }
+            mainViewModel.addExpense(newItem);
 
             dismiss();
         } catch (NumberFormatException e) {
@@ -425,25 +355,38 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
         gridParams.width = 0;
         gridParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         gridParams.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-        int marginDp = (int) (getResources().getDisplayMetrics().density * 8);
-        gridParams.setMargins(marginDp, marginDp, marginDp, marginDp);
-        layout.setLayoutParams(gridParams);
 
+        layout.setLayoutParams(gridParams);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setGravity(Gravity.CENTER_HORIZONTAL);
         layout.setBackgroundResource(R.drawable.category_button_bg);
 
+        int horizontalPaddingDp = 8;
+        int verticalPaddingDp = 12;
+        float density = getResources().getDisplayMetrics().density;
+        int horizontalPaddingPx = (int) (horizontalPaddingDp * density);
+        int verticalPaddingPx = (int) (verticalPaddingDp * density);
+
+        layout.setPadding(horizontalPaddingPx, verticalPaddingPx, horizontalPaddingPx, verticalPaddingPx);
+
         ImageView icon = new ImageView(context);
         icon.setImageResource(model.getIconResource());
 
-        icon.setColorFilter(
-                ContextCompat.getColor(context, model.getColorResource()),
-                android.graphics.PorterDuff.Mode.SRC_ATOP
-        );
+        if (model.isCustom() && model.getColorResource() != 0) {
+            try {
+                int color = ContextCompat.getColor(context, model.getColorResource());
+                icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_ATOP);
+            } catch (Resources.NotFoundException e) {
+                Log.e("ExpenseEntryFragment", "Invalid color resource ID: " + model.getColorResource());
+                icon.setColorFilter(null);
+            }
+        } else {
+            icon.setColorFilter(null);
+        }
 
         LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(
-                (int) (getResources().getDisplayMetrics().density * 48), // 48dp
-                (int) (getResources().getDisplayMetrics().density * 48)  // 48dp
+                (int) (getResources().getDisplayMetrics().density * 48),
+                (int) (getResources().getDisplayMetrics().density * 48)
         );
         icon.setLayoutParams(iconParams);
 
@@ -464,5 +407,13 @@ public class ExpenseEntryFragment extends DialogFragment implements CategoryEdit
         layout.addView(name);
 
         return layout;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (categoryViewModel != null && categoryViewModel.currentCategoryType.getValue() != null) {
+            categoryViewModel.loadCategoriesByType(categoryViewModel.currentCategoryType.getValue());
+        }
     }
 }

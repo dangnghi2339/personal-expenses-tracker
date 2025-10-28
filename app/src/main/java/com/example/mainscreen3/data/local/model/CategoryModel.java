@@ -1,4 +1,4 @@
-package com.example.mainscreen3;
+package com.example.mainscreen3.data.local.model;
 
 import java.io.Serializable;
 import java.util.Objects;

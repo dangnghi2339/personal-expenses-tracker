@@ -1,7 +1,8 @@
-package com.example.mainscreen3;
+package com.example.mainscreen3.ui.adapter;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.mainscreen3.R;
+import com.example.mainscreen3.data.local.model.CategoryModel;
 
 import java.util.List;
 
@@ -51,18 +55,17 @@ public class CategoryEditAdapter extends RecyclerView.Adapter<CategoryEditAdapte
         holder.name.setText(item.getName());
         holder.icon.setImageResource(item.getIconResource());
 
-        if (item.getColorResource() != 0) {
+        if (item.isCustom() && item.getColorResource() != 0) {
             try {
                 int color = ContextCompat.getColor(context, item.getColorResource());
 
                 holder.icon.setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_ATOP);
             } catch (Resources.NotFoundException e) {
-                int defaultColor = ContextCompat.getColor(context, R.color.colorPrimary);
-                holder.icon.setColorFilter(defaultColor, android.graphics.PorterDuff.Mode.SRC_ATOP);
+                Log.e("CategoryEditAdapter", "Invalid color resource ID: " + item.getColorResource());
+                holder.icon.setColorFilter(null);
             }
         } else {
-            int defaultColor = ContextCompat.getColor(context, R.color.colorPrimary);
-            holder.icon.setColorFilter(defaultColor, android.graphics.PorterDuff.Mode.SRC_ATOP);
+            holder.icon.setColorFilter(null);
         }
 
         holder.itemView.setOnClickListener(v -> {

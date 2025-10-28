@@ -11,17 +11,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MainScreen3">
+
         <activity
-            android:name=".AddCategoryFragment"
-            android:exported="false" />
-        <activity
-            android:name=".CategoryEditFragment"
-            android:exported="false" />
-        <activity
-            android:name=".ExpenseEntryFragment"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".ui.view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
