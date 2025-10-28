@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Moneyme</string>
+
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="login_here">Login here</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_account">Already have an account</string>
+    <string name="email">Email</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_up">Sign up</string>
+    <string name="forgot_password_q">Forgot your password?</string>
+    <string name="or">Or</string>
+    <string name="login_with_facebook">Log in with Facebook</string>
+    <string name="login_with_google">Log in with Google</string>
+
+    <string name="money">Money</string>
+    <string name="notification">Notification</string>
+    <string name="language">Language</string>
+    <string name="logout">Log out</string>
+    <string name="turn_on">Turn on</string>
+    <string name="turn_off">Turn off</string>
+    <string name="vietnamese">Vietnamese</string>
+    <string name="english">English</string>
+
+    <string name="go_to_register">No account yet? Register now</string>
+    <string name="allow_notifications">Allow notifications</string>
+
+    <string name="usd_usdollar">USD — US Dollar</string>
+    <string name="eur_euro">EUR — Euro</string>
+    <string name="vnd_vietnamese_dong">VND — Vietnamese Dong</string>
+    <string name="jpy_yen">JPY — Japanese Yen</string>
+    <string name="gbp_pound">GBP — British Pound</string>
+    <string name="krw_won">KRW — South Korean Won</string>
+    <string name="cny_yuan">CNY — Chinese Yuan</string>
+    <string name="aud_audollar">AUD — Australian Dollar</string>
+    <string name="cad_cadollar">CAD — Canadian Dollar</string>
+    <string name="sgd_sgdollar">SGD — Singapore Dollar</string>
+</resources>

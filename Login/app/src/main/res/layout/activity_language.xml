@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_page_gray"
+
+    android:fitsSystemWindows="true">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+        <TextView
+            android:text="@string/language"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="#111827"/>
+
+        <View android:layout_width="40dp" android:layout_height="40dp"/>
+    </LinearLayout>
+
+    <!-- Body -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- English -->
+        <LinearLayout
+            android:id="@+id/rowEn"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_card"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginBottom="12dp"
+            android:foreground="@drawable/list_ripple">
+
+            <TextView
+                android:id="@+id/tvEn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🇺🇸  English"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:textSize="14sp"/>
+
+            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+
+            <RadioButton
+                android:id="@+id/rbEn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#10B981"/>
+        </LinearLayout>
+
+        <!-- Vietnamese -->
+        <LinearLayout
+            android:id="@+id/rowVi"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_card"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:foreground="@drawable/list_ripple">
+
+            <TextView
+                android:id="@+id/tvVi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🇻🇳  Vietnamese"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:textSize="14sp"/>
+
+            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+
+            <RadioButton
+                android:id="@+id/rbVi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#10B981"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

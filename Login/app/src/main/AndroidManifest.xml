@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.login">
+
+    <!-- Có thể giữ hoặc bỏ; không ảnh hưởng -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".LocaleApp"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:theme="@style/Theme.Moneyme"
+        android:allowBackup="true"
+        android:supportsRtl="true">
+
+        <!-- LAUNCHER -->
+        <activity
+            android:name=".ui.Onboarding01Activity"
+            android:exported="true"
+            android:theme="@style/Theme.Moneyme.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- Không còn Facebook -->
+        <!-- Không cần Google cấu hình gì thêm -->
+
+        <activity android:name=".ui.Onboarding02Activity" />
+        <activity android:name=".ui.LoginActivity" />
+        <activity android:name=".ui.RegisterActivity" />
+        <activity android:name=".ui.IndividualActivity" />
+        <activity android:name=".ui.MoneyActivity" />
+        <activity android:name=".ui.NotificationActivity" />
+        <activity android:name=".ui.LanguageActivity" />
+
+    </application>
+</manifest>

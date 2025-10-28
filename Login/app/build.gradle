@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.login'
+    compileSdk 36
+
+    defaultConfig {
+
+        minSdk 28
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    compileOptions {
+        // App Java -> dùng Java 17
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    // KHÔNG có kotlinOptions vì không dùng Kotlin
+}
+
+dependencies {
+
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
+
+    // --- THÊM CÁC DÒNG SAU ---
+    def lifecycle_version = "2.8.3" // (Đây là phiên bản mới, bạn có thể kiểm tra bản mới nhất)
+
+    // ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    // LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
+    // Annotation processor (cần thiết cho Java 8+)
+    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    // --- KẾT THÚC PHẦN THÊM ---
+}

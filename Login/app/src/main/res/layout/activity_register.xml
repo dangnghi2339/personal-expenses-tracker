@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_auth"
+    android:fitsSystemWindows="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="36dp"
+        android:paddingBottom="36dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvCreateAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_account"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:textColor="@color/blue_700"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Username -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilUsernameR"
+            style="@style/Widget.App.TextField.Filled"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/tvCreateAccount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="18dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etUsernameR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/username"
+                android:inputType="textPersonName"
+                android:maxLength="30"
+                android:textSize="16sp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Email -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEmailR"
+            style="@style/Widget.App.TextField.Filled"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/tilUsernameR"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmailR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/email"
+                android:inputType="textEmailAddress"
+                android:textSize="16sp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassR"
+            style="@style/Widget.App.TextField.Filled"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:endIconMode="password_toggle"
+            app:layout_constraintTop_toBottomOf="@id/tilEmailR"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPassR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:textSize="16sp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Confirm Password -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilConfirmR"
+            style="@style/Widget.App.TextField.Filled"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:endIconMode="password_toggle"
+            app:layout_constraintTop_toBottomOf="@id/tilPassR"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etConfirmR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/confirm_password"
+                android:inputType="textPassword"
+                android:textSize="16sp"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Sign up button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSignUp"
+            style="@style/Widget.App.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:text="@string/sign_up"
+            app:layout_constraintTop_toBottomOf="@id/tilConfirmR"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="18dp"/>
+
+        <!-- Already have account -->
+        <TextView
+            android:id="@+id/tvAlready"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/already_have_account"
+            android:textColor="@color/gray_600"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif"
+            app:layout_constraintTop_toBottomOf="@id/btnSignUp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="14dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
