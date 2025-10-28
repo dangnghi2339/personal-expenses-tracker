@@ -1,189 +1,300 @@
 package com.example.dack1.ui.fragment;
 
+import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.util.Log;
+import android.widget.Toast; // Thêm để test GĐ 5
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.dack1.R;
 import com.example.dack1.data.model.CategoryNameSum;
-import com.example.dack1.data.model.MonthlySummary;
+import com.example.dack1.databinding.FragmentChartBinding; // SỬ DỤNG VIEW BINDING
+import com.example.dack1.ui.adapter.CategoryReportAdapter; // Adapter mới
+import com.example.dack1.ui.view.CategoryDetailActivity;
 import com.example.dack1.ui.viewmodel.TransactionViewModel;
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
+import com.example.dack1.util.FormatUtils; // Tiện ích của bạn
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.tabs.TabLayout;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class ChartFragment extends Fragment {
 
+    private FragmentChartBinding binding; // Sử dụng ViewBinding
     private TransactionViewModel transactionViewModel;
-    private PieChart pieChart;
-    private BarChart barChart;
+    private CategoryReportAdapter categoryReportAdapter; // Adapter mới
+
+    private final Calendar currentCalendar = Calendar.getInstance(); // Biến tạm để giữ ngày
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Gắn layout "fragment_chart.xml"
-        return inflater.inflate(R.layout.fragment_chart, container, false);
+        // Inflate layout bằng ViewBinding
+        binding = FragmentChartBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Ánh xạ Charts từ layout
-        pieChart = view.findViewById(R.id.pie_chart);
-        barChart = view.findViewById(R.id.bar_chart);
+        setupViewModel();
+        setupAdapter();
+        setupPieChart(); // Cài đặt biểu đồ trống ban đầu
+        setupEventListeners();
+        setupObservers();
+    }
 
-        // 2. Khởi tạo ViewModel
+    // Khởi tạo ViewModel
+    private void setupViewModel() {
         transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
-
-        // 3. Cấu hình biểu đồ
-        setupPieChart();
-        setupBarChart();
-
-        // 4. Lắng nghe dữ liệu từ ViewModel
-        observeChartData();
-        observeMonthlyData();
     }
 
-    private void setupPieChart() {
-        pieChart.setDescription(null); // Tắt mô tả
-        pieChart.setUsePercentValues(true);
-        pieChart.setEntryLabelTextSize(12f);
-        pieChart.setEntryLabelColor(Color.BLACK);
-        pieChart.getLegend().setEnabled(false); // Tắt chú thích
+    // Khởi tạo Adapter và RecyclerView
+    private void setupAdapter() {
+        categoryReportAdapter = new CategoryReportAdapter();
+        binding.rvCategoryReport.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rvCategoryReport.setAdapter(categoryReportAdapter);
+
+        // Chuẩn bị cho Giai đoạn 5: Xử lý khi click vào item
+        categoryReportAdapter.setOnItemClickListener(item -> {
+            // Lấy các tham số hiện tại từ ViewModel
+            long[] dateRange = transactionViewModel.dateRange.getValue();
+            String currentType = transactionViewModel.selectedType.getValue();
+
+            if (dateRange == null || currentType == null) {
+                Toast.makeText(getContext(), "Error: Cannot get data", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Intent intent = new Intent(getActivity(), CategoryDetailActivity.class);
+            intent.putExtra(CategoryDetailActivity.EXTRA_CATEGORY_ID, item.categoryId);
+            intent.putExtra(CategoryDetailActivity.EXTRA_CATEGORY_NAME, item.categoryName);
+            intent.putExtra(CategoryDetailActivity.EXTRA_TYPE, currentType);
+            intent.putExtra(CategoryDetailActivity.EXTRA_START_DATE, dateRange[0]);
+            intent.putExtra(CategoryDetailActivity.EXTRA_END_DATE, dateRange[1]);
+
+            startActivity(intent);
+        });
     }
 
-    private void observeChartData() {
-        // Gọi hàm mới mà chúng ta đã tạo
-        transactionViewModel.getExpenseSumByCategoryName().observe(getViewLifecycleOwner(), categorySums -> {
-            Log.d("ChartFragment", "Observer được gọi! Số lượng categorySums: " + (categorySums != null ? categorySums.size() : "null")); // <-- Thêm dòng log
-            if (categorySums != null && !categorySums.isEmpty()) {
-                // 5. Chuyển đổi List<CategorySum> thành List<PieEntry>
-                List<PieEntry> entries = new ArrayList<>();
-                for (CategoryNameSum sum : categorySums) {
-                    String label = sum.categoryName != null ? sum.categoryName : getString(R.string.unknown_category);
-                    entries.add(new PieEntry((float) sum.total, label));
+    // Cài đặt các Listener cho nút bấm
+    private void setupEventListeners() {
+        // 1. Bộ chọn Tháng/Năm
+        binding.toggleViewMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                if (checkedId == R.id.btnViewMonth) {
+                    transactionViewModel.setViewMode(true); // true = Month
+                } else if (checkedId == R.id.btnViewYear) {
+                    transactionViewModel.setViewMode(false); // false = Year
+                }
+            }
+        });
+
+        // 2. Bộ chọn Ngày
+        binding.btnPrevious.setOnClickListener(v -> transactionViewModel.previousPeriod());
+        binding.btnNext.setOnClickListener(v -> transactionViewModel.nextPeriod());
+        binding.tvSelectedDate.setOnClickListener(v -> openDatePicker());
+
+        // 3. Tabs Thu/Chi
+        binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) {
+                    // Tab "Expenditure" (Chi tiêu)
+                    transactionViewModel.setSelectedType("expense");
+                    categoryReportAdapter.setTransactionType("expense");
+                } else {
+                    // Tab "Revenue" (Thu nhập)
+                    transactionViewModel.setSelectedType("income");
+                    categoryReportAdapter.setTransactionType("income");
+                }
+            }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    // "Lắng nghe" dữ liệu từ ViewModel
+    private void setupObservers() {
+        // 1. Lắng nghe ngày tháng thay đổi
+        transactionViewModel.selectedDate.observe(getViewLifecycleOwner(), calendar -> {
+            currentCalendar.setTime(calendar.getTime()); // Cập nhật biến tạm
+            updateDateTextView();
+        });
+
+        // 2. Lắng nghe chế độ xem thay đổi (để cập nhật format ngày tháng)
+        transactionViewModel.isMonthView.observe(getViewLifecycleOwner(), isMonth -> {
+            updateDateTextView();
+        });
+
+        // 3. Lắng nghe TỔNG THU
+        transactionViewModel.totalIncome.observe(getViewLifecycleOwner(), income -> {
+            double totalIncome = (income != null) ? income : 0.0;
+            binding.tvTotalIncome.setText(FormatUtils.formatCurrency(totalIncome));
+            updateTotalRemaining(); // Cập nhật số dư
+        });
+
+        // 4. Lắng nghe TỔNG CHI
+        transactionViewModel.totalExpense.observe(getViewLifecycleOwner(), expense -> {
+            double totalExpense = (expense != null) ? expense : 0.0;
+            binding.tvTotalExpense.setText(FormatUtils.formatCurrency(totalExpense));
+            updateTotalRemaining(); // Cập nhật số dư
+        });
+
+        // 5. Lắng nghe DỮ LIỆU CHÍNH (cho Biểu đồ và RecyclerView)
+        transactionViewModel.categoryDataList.observe(getViewLifecycleOwner(), dataList -> {
+            if (dataList != null) {
+                // Tính tổng của list này
+                double grandTotal = 0.0;
+                for (CategoryNameSum item : dataList) {
+                    grandTotal += item.totalAmount;
                 }
 
-                // 6. Tạo DataSet và gán màu
-                PieDataSet dataSet = new PieDataSet(entries, "Chi tiêu theo danh mục");
-                dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
-                dataSet.setValueTextSize(14f);
-                dataSet.setValueTextColor(Color.BLACK);
-                Log.d("ChartFragment", "Đang cập nhật biểu đồ...");
-                // 7. Gán DataSet vào PieData
-                PieData pieData = new PieData(dataSet);
+                // Cập nhật PieChart
+                updatePieChart(dataList, grandTotal);
 
-                // 8. Đặt dữ liệu cho biểu đồ và "vẽ"
-                pieChart.setData(pieData);
-                pieChart.invalidate(); // Vẽ lại biểu đồ
-            } else {
-                Log.d("ChartFragment", "Không có dữ liệu, đang xóa biểu đồ...");
-                // Nếu không có dữ liệu, xóa biểu đồ cũ
-                pieChart.clear();
-                            pieChart.setCenterText(getString(R.string.no_expense_data));
-                pieChart.invalidate();
+                // Cập nhật RecyclerView
+                categoryReportAdapter.setGrandTotal(grandTotal); // Cung cấp tổng cho adapter
+                categoryReportAdapter.submitList(dataList); // Gửi list cho adapter
             }
         });
     }
 
-    private void setupBarChart() {
-        barChart.setDescription(null);
-        barChart.setDrawGridBackground(false);
-        barChart.setDrawBarShadow(false);
-        barChart.setDrawValueAboveBar(true);
-        barChart.setMaxVisibleValueCount(12);
-        barChart.setPinchZoom(false);
-        barChart.setDrawGridBackground(false);
+    // --- Các hàm Helper ---
 
-        // Configure X-axis
-        XAxis xAxis = barChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
-        xAxis.setGranularity(1f);
-        xAxis.setLabelCount(12);
-
-        // Configure Y-axis
-        barChart.getAxisLeft().setDrawGridLines(true);
-        barChart.getAxisRight().setEnabled(false);
-
-        // Configure legend
-        barChart.getLegend().setEnabled(true);
-        barChart.getLegend().setVerticalAlignment(com.github.mikephil.charting.components.Legend.LegendVerticalAlignment.BOTTOM);
-        barChart.getLegend().setHorizontalAlignment(com.github.mikephil.charting.components.Legend.LegendHorizontalAlignment.CENTER);
+    // Cập nhật text ngày tháng
+    private void updateDateTextView() {
+        SimpleDateFormat sdf;
+        if (Boolean.TRUE.equals(transactionViewModel.isMonthView.getValue())) {
+            sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
+        } else {
+            sdf = new SimpleDateFormat("yyyy", Locale.getDefault());
+        }
+        binding.tvSelectedDate.setText(sdf.format(currentCalendar.getTime()));
     }
 
-    private void observeMonthlyData() {
-        // Get start date for last 12 months
-        java.util.Calendar calendar = java.util.Calendar.getInstance();
-        calendar.add(java.util.Calendar.MONTH, -12);
-        long startDate = calendar.getTimeInMillis();
+    // Cập nhật số dư
+    private void updateTotalRemaining() {
+        // Lấy giá trị đã quan sát (an toàn hơn)
+        Double income = transactionViewModel.totalIncome.getValue();
+        Double expense = transactionViewModel.totalExpense.getValue();
+        double totalIncome = (income != null) ? income : 0.0;
+        double totalExpense = (expense != null) ? expense : 0.0;
+        double remaining = totalIncome - totalExpense;
+        binding.tvTotalRemaining.setText(FormatUtils.formatCurrency(remaining));
 
-        transactionViewModel.getMonthlySummaries(startDate).observe(getViewLifecycleOwner(), monthlySummaries -> {
-            if (monthlySummaries != null && !monthlySummaries.isEmpty()) {
-                setupBarChartData(monthlySummaries);
-            } else {
-                barChart.clear();
-                barChart.invalidate();
-            }
-        });
+        // Đổi màu số dư
+        if (remaining >= 0) {
+            binding.tvTotalRemaining.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        } else {
+            binding.tvTotalRemaining.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        }
     }
 
-    private void setupBarChartData(List<MonthlySummary> monthlySummaries) {
-        List<BarEntry> incomeEntries = new ArrayList<>();
-        List<BarEntry> expenseEntries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
+    // Mở cửa sổ chọn ngày
+    private void openDatePicker() {
+        DatePickerDialog.OnDateSetListener dateSetListener = (view, year, month, dayOfMonth) -> {
+            currentCalendar.set(Calendar.YEAR, year);
+            currentCalendar.set(Calendar.MONTH, month);
+            currentCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            transactionViewModel.setSelectedDate(currentCalendar); // Gửi ngày mới cho ViewModel
+        };
 
-        // Reverse the list to show oldest to newest
-        List<MonthlySummary> reversedList = new ArrayList<>(monthlySummaries);
-        java.util.Collections.reverse(reversedList);
+        new DatePickerDialog(getContext(), dateSetListener,
+                currentCalendar.get(Calendar.YEAR),
+                currentCalendar.get(Calendar.MONTH),
+                currentCalendar.get(Calendar.DAY_OF_MONTH))
+                .show();
+    }
 
-        for (int i = 0; i < reversedList.size(); i++) {
-            MonthlySummary summary = reversedList.get(i);
-            incomeEntries.add(new BarEntry(i, (float) summary.totalIncome));
-            expenseEntries.add(new BarEntry(i, (float) summary.totalExpense));
-            
-            // Format month label (e.g., "2024-01" -> "01/24")
-            String[] parts = summary.monthYear.split("-");
-            if (parts.length == 2) {
-                labels.add(parts[1] + "/" + parts[0].substring(2));
-            } else {
-                labels.add(summary.monthYear);
+    // --- Cập nhật Biểu đồ PieChart ---
+
+    // Cài đặt ban đầu
+    private void setupPieChart() {
+        binding.pieChart.setUsePercentValues(true);
+        binding.pieChart.getDescription().setEnabled(false);
+        binding.pieChart.setExtraOffsets(5, 10, 5, 5);
+        binding.pieChart.setDragDecelerationFrictionCoef(0.95f);
+        binding.pieChart.setDrawHoleEnabled(true);
+        binding.pieChart.setHoleColor(Color.TRANSPARENT);
+        binding.pieChart.setTransparentCircleRadius(61f);
+        binding.pieChart.setRotationAngle(0);
+        binding.pieChart.setRotationEnabled(true);
+        binding.pieChart.setHighlightPerTapEnabled(true);
+        binding.pieChart.animateY(1400, Easing.EaseInOutQuad);
+        binding.pieChart.getLegend().setEnabled(false); // Ẩn chú thích
+    }
+
+    // Cập nhật dữ liệu mới cho PieChart
+    private void updatePieChart(List<CategoryNameSum> dataList, double grandTotal) {
+        // Chuyển đổi dataList sang PieEntry
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        ArrayList<Integer> colors = new ArrayList<>();
+
+        for (CategoryNameSum item : dataList) {
+            if (item.totalAmount > 0) {
+                entries.add(new PieEntry((float) item.totalAmount, item.categoryName));
+                // Lấy màu từ dữ liệu
+                try {
+                    colors.add(Color.parseColor(item.categoryColor));
+                } catch (Exception e) {
+                    colors.add(Color.GRAY); // Màu dự phòng
+                }
             }
         }
 
-        BarDataSet incomeDataSet = new BarDataSet(incomeEntries, "Thu nhập");
-        incomeDataSet.setColor(ColorTemplate.MATERIAL_COLORS[0]);
-        incomeDataSet.setValueTextSize(10f);
+        if (entries.isEmpty()) {
+            binding.pieChart.clear();
+            binding.pieChart.setCenterText("No Data");
+            binding.pieChart.invalidate();
+            return;
+        }
 
-        BarDataSet expenseDataSet = new BarDataSet(expenseEntries, "Chi tiêu");
-        expenseDataSet.setColor(ColorTemplate.MATERIAL_COLORS[1]);
-        expenseDataSet.setValueTextSize(10f);
+        PieDataSet dataSet = new PieDataSet(entries, "Categories");
+        dataSet.setSliceSpace(3f);
+        dataSet.setSelectionShift(5f);
+        dataSet.setColors(colors); // Sử dụng màu từ database
 
-        BarData barData = new BarData(incomeDataSet, expenseDataSet);
-        barData.setBarWidth(0.3f);
-        barData.setValueFormatter(new com.github.mikephil.charting.formatter.LargeValueFormatter());
+        PieData data = new PieData(dataSet);
+        data.setValueFormatter(new PercentFormatter(binding.pieChart));
+        data.setValueTextSize(10f);
+        data.setValueTextColor(Color.BLACK);
 
-        barChart.setData(barData);
-        barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-        barChart.invalidate();
+        binding.pieChart.setData(data);
+        binding.pieChart.setCenterText(FormatUtils.formatCurrency(grandTotal)); // Set tổng tiền ở giữa
+        binding.pieChart.setCenterTextSize(16f);
+        binding.pieChart.setCenterTextColor(Color.BLACK);
+        binding.pieChart.animateY(1000, Easing.EaseInOutQuad);
+        binding.pieChart.invalidate();
+    }
+
+    // Hủy binding khi Fragment bị hủy
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

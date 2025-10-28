@@ -12,7 +12,7 @@ import com.example.dack1.data.model.Transaction;
 
 import java.util.List;
 import java.util.Map;
-
+import com.example.dack1.data.model.MonthlyCategorySummary; // ĐẢM BẢO CÓ DÒNG NÀY
 import com.example.dack1.data.model.CategorySum;
 import com.example.dack1.data.model.CategoryNameSum;
 import com.example.dack1.data.model.MonthlySummary;
@@ -65,13 +65,6 @@ public interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE id = :id")
     LiveData<Transaction> getTransactionById(long id);
 
-    /**
-     * Query này tính tổng số tiền (SUM(amount)) cho mỗi category_id,
-     * chỉ áp dụng cho các giao dịch 'expense' (chi tiêu).
-     * Nó trả về một List<CategorySum>.
-     */
-    @Query("SELECT c.name AS categoryName, SUM(t.amount) AS total FROM transactions t INNER JOIN categories c ON t.category_id = c.id WHERE t.type = 'expense' GROUP BY c.name")
-    LiveData<List<CategoryNameSum>> getExpenseSumByCategoryName(); // <-- Phải là LiveData
 
     /**
      * Lấy tất cả giao dịch trong một khoảng timestamp (từ 00:00:00 ngày bắt đầu
@@ -129,8 +122,52 @@ public interface TransactionDao {
     LiveData<Integer> getTransactionCountByCategoryId(long categoryId);
 
     /**
+     * Lấy tổng tiền theo danh mục, lọc theo loại (thu/chi) và khoảng thời gian.
+     * Trả về một List<CategoryNameSum> để dùng cho cả Biểu đồ tròn và RecyclerView.
+     * SỬA: Dùng đúng tên cột 'category_id', 'transaction_date', 'icon_name', 'c.id'.
+     * Bỏ 'userId' vì bảng transactions không có.
+     */
+    @Query("SELECT t.category_id as categoryId, c.name as categoryName, c.icon_name as categoryIcon, c.color as categoryColor, SUM(t.amount) as totalAmount " +
+            "FROM transactions t JOIN categories c ON t.category_id = c.id " +
+            "WHERE t.type = :type AND t.transaction_date BETWEEN :startDate AND :endDate " + // Sửa timestamp -> transaction_date, bỏ userId
+            "GROUP BY t.category_id, categoryName, categoryIcon, categoryColor " + // Sửa categoryId -> t.category_id
+            "ORDER BY totalAmount DESC")
+    LiveData<List<CategoryNameSum>> getCategorySumsByDateRange(String type, long startDate, long endDate); // Bỏ userId khỏi tham số
+
+    /**
+     * Lấy tổng số tiền (thu hoặc chi) trong một khoảng thời gian.
+     * Dùng cho Box tổng quan (Total revenue, Total expenditure).
+     * SỬA: Dùng đúng tên cột 'transaction_date'. Bỏ 'userId'.
+     */
+    @Query("SELECT SUM(amount) FROM transactions " +
+            "WHERE type = :type AND transaction_date BETWEEN :startDate AND :endDate") // Sửa timestamp -> transaction_date, bỏ userId
+    LiveData<Double> getTotalAmountByDateRange(String type, long startDate, long endDate); // Bỏ userId khỏi tham số, kiểu trả về là Double như hàm cũ của bạn
+    /**
      * Helper class for daily summaries with date.
      */
+
+    /**
+     * Lấy TẤT CẢ giao dịch của MỘT danh mục cụ thể trong một khoảng thời gian.
+     * Dùng cho RecyclerView ở màn hình chi tiết.
+     */
+    @Query("SELECT * FROM transactions " +
+            "WHERE category_id = :categoryId AND transaction_date BETWEEN :startDate AND :endDate " +
+            "ORDER BY transaction_date DESC")
+    LiveData<List<Transaction>> getTransactionsForCategoryByDateRange(long categoryId, long startDate, long endDate);
+
+    /**
+     * Lấy tổng chi tiêu của MỘT danh mục theo từng tháng (cho 12 tháng gần nhất).
+     * Dùng cho BarChart ở màn hình chi tiết.
+     * Cần một POJO mới (MonthlyCategorySummary) để giữ kết quả.
+     */
+    @Query("SELECT " +
+            "strftime('%Y-%m', datetime(transaction_date/1000, 'unixepoch')) AS monthYear, " +
+            "SUM(amount) AS totalAmount " +
+            "FROM transactions " +
+            "WHERE category_id = :categoryId AND type = :type AND transaction_date >= :startDate " + // startDate (12 tháng trước)
+            "GROUP BY strftime('%Y-%m', datetime(transaction_date/1000, 'unixepoch')) " +
+            "ORDER BY monthYear ASC") // Sắp xếp TĂNG DẦN để BarChart hiển thị đúng
+    LiveData<List<MonthlyCategorySummary>> getMonthlySummaryForCategory(long categoryId, String type, long startDate);
     class DailySummaryWithDate {
         public String date;
         public double totalIncome;

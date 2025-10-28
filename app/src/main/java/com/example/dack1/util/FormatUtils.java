@@ -4,6 +4,8 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 
 public class FormatUtils {
@@ -16,7 +18,21 @@ public class FormatUtils {
             return String.format(Locale.getDefault(), "%,.0f VND", amount);
         }
     }
-
+    /**
+     * Định dạng timestamp (long) thành chuỗi "Tháng Năm" (ví dụ: "October 2025").
+     * @param timestamp Unix timestamp in milliseconds.
+     * @return Formatted string or empty string if timestamp is invalid.
+     */
+    public static String formatMonthYear(long timestamp) {
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(timestamp);
+            SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault()); // Locale.US hoặc Locale.getDefault()
+            return sdf.format(cal.getTime());
+        } catch (Exception e) {
+            return ""; // Trả về chuỗi rỗng nếu có lỗi
+        }
+    }
     public static int getDrawableIdByName(Context context, String name) {
         if (context == null || TextUtils.isEmpty(name)) return 0;
         return context.getResources().getIdentifier(name, "drawable", context.getPackageName());

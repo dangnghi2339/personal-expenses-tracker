@@ -45,7 +45,10 @@
         <activity android:name=".ui.view.CostalActivity" />
         <activity android:name=".ui.view.LoginActivity" />
         <activity android:name=".ui.view.RegisterActivity" />
-
+        <activity
+            android:name=".ui.view.CategoryDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.DACK1" />
     </application>
 
 </manifest>
