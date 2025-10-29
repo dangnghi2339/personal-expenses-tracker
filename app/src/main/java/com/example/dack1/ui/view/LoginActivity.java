@@ -55,6 +55,11 @@ public class LoginActivity extends AppCompatActivity {
 
         // Khởi tạo Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        configureGoogleSignIn();
+        initViews();
+        initViewModel(); // Đảm bảo userViewModel được khởi tạo
+        setupClickListeners();
+        observeViewModel();
 
         // Cấu hình Google Sign-In
         configureGoogleSignIn();
@@ -157,24 +162,28 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        // Đăng nhập Firebase thành công
                         FirebaseUser user = mAuth.getCurrentUser();
-
-                        // Lưu session và chuyển màn hình
-                        // (Bạn có thể muốn kiểm tra xem user này đã tồn tại trong Firestore chưa,
-                        // giống như logic trong `UserRepository` để lưu user mới)
                         if (user != null) {
-                            // Tạm dùng hashCode() làm ID, bạn nên dùng UID (user.getUid()) nếu lưu vào DB
+
+                            // === GỌI VIEWMODEL ĐỂ LƯU VÀO FIRESTORE ===
+                            // Gọi hàm mới trong UserViewModel
+                            userViewModel.checkAndSaveGoogleUser(user);
+                            // =========================================
+
+                            // Lưu session và chuyển màn hình (như cũ)
                             sessionManager.createLoginSession((int) user.hashCode(), user.getEmail());
                             sessionManager.setUserName(user.getDisplayName());
 
-                            // Ẩn loading và chuyển màn hình
                             showLoading(false);
                             Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                             goToMainActivity();
+                        } else {
+                            // Trường hợp hiếm gặp user null sau khi signIn thành công
+                            showLoading(false);
+                            Toast.makeText(this, "Lỗi: Không lấy được thông tin người dùng.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        // Xác thực Firebase thất bại
+                        // Xác thực Firebase thất bại (như cũ)
                         showLoading(false);
                         Toast.makeText(this, "Lỗi xác thực Firebase: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }

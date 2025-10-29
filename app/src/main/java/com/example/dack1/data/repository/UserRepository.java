@@ -16,7 +16,9 @@ import com.google.firebase.auth.UserProfileChangeRequest; // Để cập nhật 
 import com.google.android.gms.tasks.Task; // Cho các tác vụ bất đồng bộ của Firebase
 import com.google.android.gms.tasks.Tasks; // Để đợi tác vụ hoàn thành (dùng cẩn thận)
 import com.google.firebase.firestore.FirebaseFirestore;
-
+import com.google.firebase.firestore.DocumentReference; // Import mới
+import com.google.firebase.firestore.DocumentSnapshot; // Import mới
+import com.google.firebase.firestore.FieldValue;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import android.util.Log; // Để ghi log lỗi
@@ -138,7 +140,44 @@ public class UserRepository {
         }
     }
 
+    public void saveGoogleUserToFirestoreIfNotExists(FirebaseUser user) {
+        if (user == null) return;
 
+        String uid = user.getUid();
+        DocumentReference userDocRef = db.collection("users").document(uid);
+
+        try {
+            // Sử dụng Tasks.await để kiểm tra xem document đã tồn tại chưa
+            // Quan trọng: Phải đảm bảo hàm này được gọi từ background thread (ViewModel sẽ lo việc này)
+            DocumentSnapshot document = Tasks.await(userDocRef.get());
+
+            if (!document.exists()) {
+                // Document chưa tồn tại -> Tạo mới
+                Map<String, Object> userDocument = new HashMap<>();
+                userDocument.put("name", user.getDisplayName()); // Lấy tên từ Google
+                userDocument.put("email", user.getEmail());     // Lấy email từ Google
+                userDocument.put("createdAt", FieldValue.serverTimestamp()); // Thêm dấu thời gian
+                // Bạn có thể thêm các trường khác nếu muốn (ví dụ: photoUrl = user.getPhotoUrl())
+
+                // Ghi vào Firestore (dùng await để đảm bảo hoàn tất)
+                Tasks.await(userDocRef.set(userDocument));
+                Log.d(TAG, "New Google user document created in Firestore for UID: " + uid);
+            } else {
+                // Document đã tồn tại
+                Log.d(TAG, "User document already exists in Firestore for UID: " + uid);
+                // (Tùy chọn) Cập nhật tên nếu nó thay đổi so với Google?
+                // String existingName = document.getString("name");
+                // if (user.getDisplayName() != null && !user.getDisplayName().equals(existingName)) {
+                //     Tasks.await(userDocRef.update("name", user.getDisplayName()));
+                //     Log.d(TAG, "Updated user name in Firestore for UID: " + uid);
+                // }
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(TAG, "Error checking/saving Google user to Firestore", e);
+            Thread.currentThread().interrupt(); // Restore interrupt status
+            // Xử lý lỗi (ví dụ: thông báo cho người dùng, ghi log chi tiết hơn)
+        }
+    }
     /**
      * Tìm kiếm người dùng bằng email (trả về LiveData để observe).
      * Giữ lại hàm này nếu bạn cần observe thông tin user ở đâu đó.

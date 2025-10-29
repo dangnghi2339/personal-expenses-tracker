@@ -16,7 +16,7 @@ import com.example.dack1.domain.usecase.RegisterUseCase; // <- Thêm import
 import java.util.List; // <- Thêm import (nếu cần mGetAllUser)
 import java.util.concurrent.ExecutorService; // <- Thêm import
 import java.util.concurrent.Executors; // <- Thêm import
-
+import com.google.firebase.auth.FirebaseUser;
 
 /**
  * ViewModel for User authentication operations using Use Cases.
@@ -41,7 +41,16 @@ public class UserViewModel extends AndroidViewModel {
     // LiveData để lấy tất cả user (nếu cần giữ lại)
     LiveData<List<User>> mGetAllUser; // Giữ lại nếu cần
 
-
+    /**
+     * Hàm mới: Gọi UserRepository để lưu người dùng Google vào Firestore.
+     * @param user FirebaseUser vừa đăng nhập thành công bằng Google.
+     */
+    public void checkAndSaveGoogleUser(FirebaseUser user) {
+        // Chỉ cần gọi hàm trong Repository trên background thread
+        executorService.execute(() -> { // Sử dụng ExecutorService đã có
+            userRepository.saveGoogleUserToFirestoreIfNotExists(user);
+        });
+    }
     // --- CONSTRUCTOR ---
     public UserViewModel(@NonNull Application application) {
         super(application);
