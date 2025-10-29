@@ -1,3 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">DACK1</string>
+
+    <string name="hello_blank_fragment">Xin chào</string>
+    <string name="unknown_category">Không rõ danh mục</string>
+
+    <string name="login_success">Đăng nhập thành công!</string>
+    <string name="login_failed">Email hoặc mật khẩu không đúng</string>
+    <string name="register_success">Đăng ký thành công!</string>
+    <string name="register_failed">Email này đã được sử dụng</string>
+    <string name="fill_all_fields">Vui lòng điền tất cả các trường</string>
+    <string name="password_mismatch">Xác nhận mật khẩu không khớp</string>
+    <string name="password_too_short">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="logout_success">Đã đăng xuất</string>
+
+    <string name="nav_income_expense">Thu/Chi</string>
+    <string name="nav_calendar">Lịch</string>
+    <string name="nav_statistical">Thống kê</string>
+    <string name="nav_individual">Cá nhân</string>
+
+    <string name="rb_expense_add">Chi Tiêu</string>
+    <string name="rb_income_add">Thu Nhập</string>
+    <string name="timetv_add">Thời gian</string>
+    <string name="amounttv_add">Số tiền</string>
+    <string name="myResult_add">Ghi chú</string>
+    <string name="categorytv_add">Biểu tượng</string>
+
+    <string name="category_name_required">Tên danh mục không thể để trống</string>
+    <string name="select_icon">Vui lòng chọn một biểu tượng</string>
+    <string name="select_color">Vui lòng chọn một màu</string>
+    <string name="category_added">Đã thêm!</string>
+    <string name="category_updated">Đã cập nhật!</string>
+    <string name="category_deleted">Đã xoá!</string>
+    <string name="category_name_exists">Tên danh mục đã tồn tại</string>
+    <string name="cannot_delete_category_in_use">Không thể xoá: danh mục đang được sử dụng</string>
+    <string name="confirm_delete">Xác nhận xoá</string>
+    <string name="confirm_delete_category">Bạn có chắc muốn xoá danh mục \'%s\'?</string>
+    <string name="delete">Xoá</string>
+    <string name="cancel">Huỷ</string>
+
+    <string name="transaction_deleted">Đã xoá: %s</string>
+    <string name="no_transactions">Không có giao dịch</string>
+    <string name="no_transactions_today">Không có giao dịch trong ngày này</string>
+    <string name="no_categories">Không có danh mục</string>
+
+    <string name="expense_by_category">Chi tiêu theo danh mục</string>
+    <string name="income_expense_by_month">Thu chi theo tháng</string>
+    <string name="no_expense_data">Không có dữ liệu chi tiêu</string>
+    <string name="app_name">Moneyme</string>
+    <string name="category">Danh mục</string>
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="login_here">Đăng nhập tại đây</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="already_have_account">Đã có tài khoản</string>
+    <string name="email">Email</string>
+    <string name="username">Tên người dùng</string>
+    <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="sign_in">Đăng nhập</string>
+    <string name="sign_up">Đăng ký</string>
+    <string name="forgot_password_q">Quên mật khẩu?</string>
+    <string name="or">Hoặc</string>
+    <string name="login_with_facebook">Đăng nhập với Facebook</string>
+    <string name="login_with_google">Đăng nhập với Google</string>
+
+    <string name="money">Tiền tệ</string>
+    <string name="notification">Thông báo</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="turn_on">Bật</string>
+    <string name="turn_off">Tắt</string>
+    <string name="vietnamese">Tiếng Việt</string>
+    <string name="english">Tiếng Anh</string>
+
+    <string name="go_to_register">Chưa có tài khoản? Đăng ký ngay</string>
+    <string name="allow_notifications">Cho phép thông báo</string>
+
+    <string name="usd_usdollar">USD — Đô la Mỹ</string>
+    <string name="eur_euro">EUR — Euro</string>
+    <string name="vnd_vietnamese_dong">VND — Đồng Việt Nam</string>
+    <string name="jpy_yen">JPY — Yên Nhật</string>
+    <string name="gbp_pound">GBP — Bảng Anh</string>
+    <string name="krw_won">KRW — Won Hàn Quốc</string>
+    <string name="cny_yuan">CNY — Nhân dân tệ</string>
+    <string name="aud_audollar">AUD — Đô la Úc</string>
+    <string name="cad_cadollar">CAD — Đô la Canada</string>
+    <string name="sgd_sgdollar">SGD — Đô la Singapore</string>
 </resources>

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1057732322123",
+    "project_id": "personal-expenses-tracke-71bfe",
+    "storage_bucket": "personal-expenses-tracke-71bfe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1057732322123:android:aae9d1181dce1bb95dbece",
+        "android_client_info": {
+          "package_name": "com.example.dack1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1057732322123-4ovb4rpigiveoheim7s22fgg6u6v3j57.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dack1",
+            "certificate_hash": "9808d087d50bfa697f9d0c50c4932cc6871797d3"
+          }
+        },
+        {
+          "client_id": "1057732322123-49dmtm1543sl1q6ga63666dnuh8tu3fi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjPkvRPAhXqs29ZleLx6kQlYojgkoJ-oY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1057732322123-49dmtm1543sl1q6ga63666dnuh8tu3fi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

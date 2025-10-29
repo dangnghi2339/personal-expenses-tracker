@@ -3,7 +3,7 @@ package com.example.dack1.data.model;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
+import androidx.room.Ignore;
 /**
  * Đây là lớp Entity đại diện cho bảng 'transactions' trong cơ sở dữ liệu.
  * Room sẽ sử dụng lớp này để tạo bảng và các đối tượng giao dịch.
@@ -67,7 +67,14 @@ public class Transaction {
         this.description = description;
         this.categoryId = categoryId;
     }
-
+    @Ignore
+    public Transaction(double amount, String type, long transactionDate, String description, long categoryId) {
+        this.amount = amount;
+        this.type = type;
+        this.transactionDate = transactionDate;
+        this.description = description;
+        this.categoryId = categoryId;
+    }
     // Bạn có thể tạo thêm các constructor khác để tiện cho việc tạo đối tượng mới.
     // Tạm thời chúng ta sẽ để trống và sẽ bổ sung sau nếu cần.
 

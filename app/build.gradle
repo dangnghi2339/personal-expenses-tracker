@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.gms.google.services)
+
 }
 
 android {
@@ -26,21 +28,41 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
-// ViewModel and LiveData (Thành phần kiến trúc Jetpack)
+// Bạn có thể đã có dòng này để quản lý phiên bản (BOM)
+    implementation platform('com.google.firebase:firebase-bom:33.1.1') // (Nên kiểm tra phiên bản mới nhất)
+
+    // Bạn đã có thư viện này cho Login/Register
+    implementation 'com.google.firebase:firebase-auth'
+
+    // === THÊM DÒNG NÀY ĐỂ SỬ DỤNG CLOUD FIRESTORE ===
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+    implementation libs.firebase.firestore
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+    // ViewModel and LiveData (Thành phần kiến trúc Jetpack)
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.8.2"
     implementation "androidx.lifecycle:lifecycle-livedata:2.8.2"
 
     // Room (Cơ sở dữ liệu)
     implementation "androidx.room:room-runtime:2.6.1"
     annotationProcessor "androidx.room:room-compiler:2.6.1"
-    implementation libs.appcompat
-    implementation libs.material
-    implementation libs.activity
-    implementation libs.constraintlayout
-    testImplementation libs.junit
-    androidTestImplementation libs.ext.junit
-    androidTestImplementation libs.espresso.core
+    // Navigation (Quản lý Fragments)
+    implementation 'androidx.navigation:navigation-fragment:2.7.7'
+    implementation 'androidx.navigation:navigation-ui:2.7.7'
+
+//// Biểu đồ (Dùng cho Giai đoạn 2)
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'org.mindrot:jbcrypt:0.4'
 }

@@ -4,8 +4,16 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 import com.example.dack1.data.local.dao.TransactionDao;
 import com.example.dack1.data.local.database.AppDatabase;
+import com.example.dack1.data.model.MonthlyCategorySummary;
 import com.example.dack1.data.model.Transaction;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import com.example.dack1.data.model.CategorySum;
+import com.example.dack1.data.model.CategoryNameSum;
+import com.example.dack1.data.model.MonthlySummary;
+import com.example.dack1.data.model.DailySummary;
+import com.example.dack1.data.local.dao.TransactionDao;
 
 /**
  * Repository quản lý dữ liệu cho Transaction.
@@ -30,7 +38,15 @@ public class TransactionRepository {
         // Dữ liệu này sẽ được cache lại và tự động cập nhật.
         allTransactions = transactionDao.getAllTransactions();
     }
+    public LiveData<List<CategoryNameSum>> getCategorySumsByDateRange(String type, long startDate, long endDate) {
+        // Đảm bảo gọi hàm DAO tương ứng, không có userId
+        return transactionDao.getCategorySumsByDateRange(type, startDate, endDate);
+    }
 
+    public LiveData<Double> getTotalAmountByDateRange(String type, long startDate, long endDate) {
+        // Đảm bảo gọi hàm DAO tương ứng, không có userId
+        return transactionDao.getTotalAmountByDateRange(type, startDate, endDate);
+    }
     /**
      * Cung cấp danh sách tất cả các giao dịch cho ViewModel.
      * ViewModel sẽ "lắng nghe" LiveData này.
@@ -39,7 +55,13 @@ public class TransactionRepository {
     public LiveData<List<Transaction>> getAllTransactions() {
         return allTransactions;
     }
+    public LiveData<Transaction> getTransactionById(long id) {
+        return transactionDao.getTransactionById(id);
+    }
 
+    public LiveData<List<Transaction>> getTransactionsByTimestampRange(long startDate, long endDate) {
+        return transactionDao.getTransactionsByTimestampRange(startDate, endDate);
+    }
     /**
      * Chèn một giao dịch mới.
      * Thao tác này phải được thực hiện trên một luồng nền (background thread)
@@ -63,5 +85,37 @@ public class TransactionRepository {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             transactionDao.delete(transaction);
         });
+    }
+    public LiveData<Double> getTotalIncomeForMonth(long startDate, long endDate) {
+        return transactionDao.getTotalIncomeForMonth(startDate, endDate);
+    }
+
+    public LiveData<Double> getTotalExpenseForMonth(long startDate, long endDate) {
+        return transactionDao.getTotalExpenseForMonth(startDate, endDate);
+    }
+
+    public LiveData<List<MonthlySummary>> getMonthlySummaries(long startDate) {
+        return transactionDao.getMonthlySummaries(startDate);
+    }
+    public LiveData<List<Transaction>> getTransactionsForCategoryByDateRange(long categoryId, long startDate, long endDate) {
+        return transactionDao.getTransactionsForCategoryByDateRange(categoryId, startDate, endDate);
+    }
+
+    public LiveData<List<MonthlyCategorySummary>> getMonthlySummaryForCategory(long categoryId, String type, long startDate) {
+        return transactionDao.getMonthlySummaryForCategory(categoryId, type, startDate);
+    }
+    public LiveData<Map<String, DailySummary>> getDailySummariesForMonth(long startDate, long endDate) {
+        return androidx.lifecycle.Transformations.map(
+            transactionDao.getDailySummariesForMonth(startDate, endDate),
+            dailySummaryWithDates -> {
+                Map<String, DailySummary> dailySummaries = new HashMap<>();
+                if (dailySummaryWithDates != null) {
+                    for (TransactionDao.DailySummaryWithDate item : dailySummaryWithDates) {
+                        dailySummaries.put(item.date, new DailySummary(item.totalIncome, item.totalExpense));
+                    }
+                }
+                return dailySummaries;
+            }
+        );
     }
 }

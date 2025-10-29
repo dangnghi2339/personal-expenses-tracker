@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="unknown_category">Unknown category</string>
+
+    <!-- Authentication strings -->
+    <string name="login_success">Login successful!</string>
+    <string name="login_failed">Email or password is incorrect</string>
+    <string name="register_success">Registration successful!</string>
+    <string name="register_failed">This email is already in use</string>
+    <string name="fill_all_fields">Please fill in all fields</string>
+    <string name="password_mismatch">Confirm password does not match</string>
+    <string name="password_too_short">Password must be at least 6 characters</string>
+    <string name="logout_success">Logged out</string>
+
+    <string name="nav_income_expense">Income/Expense</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_statistical">Statistical</string>
+    <string name="nav_individual">Individual</string>
+
+    <string name="rb_expense_add">Expense</string>
+    <string name="rb_income_add">Income</string>
+    <string name="timetv_add">Time</string>
+    <string name="amounttv_add">Amount</string>
+    <string name="myResult_add">Note</string>
+    <string name="categorytv_add">Category</string>
+
+    <!-- Category strings -->
+    <string name="category_name_required">Category name cannot be empty</string>
+    <string name="select_icon">Please select an icon</string>
+    <string name="select_color">Please select a color</string>
+    <string name="category_added">Added!</string>
+    <string name="category_updated">Updated!</string>
+    <string name="category_deleted">Deleted!</string>
+    <string name="category_name_exists">Category name already exists</string>
+    <string name="cannot_delete_category_in_use">Cannot delete: category is being used in transactions</string>
+    <string name="confirm_delete">Confirm delete</string>
+    <string name="confirm_delete_category">Are you sure you want to delete category \'%s\'?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Transaction strings -->
+    <string name="transaction_deleted">Deleted: %s</string>
+    <string name="no_transactions">No transactions</string>
+    <string name="no_transactions_today">No transactions on this day</string>
+    <string name="no_categories">No categories</string>
+
+    <!-- Chart strings -->
+    <string name="expense_by_category">Expenses by category</string>
+    <string name="income_expense_by_month">Income and expenses by month</string>
+    <string name="no_expense_data">No expense data</string>
+    <string name="app_name">Moneyme</string>
+    <string name="category">Category</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="login_here">Login here</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_account">Already have an account</string>
+    <string name="email">Email</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="sign_up">Sign up</string>
+    <string name="forgot_password_q">Forgot your password?</string>
+    <string name="or">Or</string>
+    <string name="login_with_facebook">Log in with Facebook</string>
+    <string name="login_with_google">Log in with Google</string>
+
+    <string name="money">Money</string>
+    <string name="notification">Notification</string>
+    <string name="language">Language</string>
+    <string name="logout">Log out</string>
+    <string name="turn_on">Turn on</string>
+    <string name="turn_off">Turn off</string>
+    <string name="vietnamese">Vietnamese</string>
+    <string name="english">English</string>
+
+    <string name="go_to_register">No account yet? Register now</string>
+    <string name="allow_notifications">Allow notifications</string>
+
+    <string name="usd_usdollar">USD — US Dollar</string>
+    <string name="eur_euro">EUR — Euro</string>
+    <string name="vnd_vietnamese_dong">VND — Vietnamese Dong</string>
+    <string name="jpy_yen">JPY — Japanese Yen</string>
+    <string name="gbp_pound">GBP — British Pound</string>
+    <string name="krw_won">KRW — South Korean Won</string>
+    <string name="cny_yuan">CNY — Chinese Yuan</string>
+    <string name="aud_audollar">AUD — Australian Dollar</string>
+    <string name="cad_cadollar">CAD — Canadian Dollar</string>
+    <string name="sgd_sgdollar">SGD — Singapore Dollar</string>
+</resources>
