@@ -34,7 +34,9 @@ import com.example.dack1.data.model.Category; // Model Category
 import com.example.dack1.ui.viewmodel.CategoryViewModel; // ViewModel Category
 import java.util.ArrayList;   // Cho list tên Category
 import java.util.List;        // Cho list tên Category
-public class AddTransactionActivity extends AppCompatActivity {
+import com.example.dack1.ui.view.BaseActivity;
+
+public class AddTransactionActivity extends BaseActivity {
     private CategoryViewModel categoryViewModel; // ViewModel mới
        // Spinner mới
     private List<Category> categoryList = new ArrayList<>(); // List để giữ Category objects

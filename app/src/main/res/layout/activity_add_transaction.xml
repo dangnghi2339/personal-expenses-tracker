@@ -22,7 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Expense"
+            android:text="@string/rb_expense_add"
             android:checked="true"
             android:textSize="16sp"
             android:background="@drawable/rounded_button"
@@ -36,7 +36,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Income"
+            android:text="@string/rb_income_add"
             android:textSize="16sp"
             android:background="@drawable/rounded_button"
             android:button="@null"
@@ -62,7 +62,7 @@
             android:layout_width="35dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Time"
+            android:text="@string/timetv_add"
             android:textColor="#FF000000"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -94,7 +94,7 @@
             android:layout_width="35dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Amount"
+            android:text="@string/amounttv_add"
             android:textSize="20sp"
             android:textColor="#FF000000"
             android:textStyle="bold"/>
@@ -128,7 +128,7 @@
             android:textSize="20sp"
             android:textColor="#FF000000"
             android:textStyle="bold"
-            android:text="Note" />
+            android:text="@string/myResult_add" />
 
         <EditText
             android:id="@+id/editText1"
@@ -154,7 +154,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Category"
+            android:text="@string/categorytv_add"
             android:textSize="20sp"
             android:textColor="#FF000000"
             android:textStyle="bold" />

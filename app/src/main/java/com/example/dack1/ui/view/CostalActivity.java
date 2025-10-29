@@ -34,8 +34,9 @@ import com.example.dack1.data.model.Category;
 import com.example.dack1.ui.adapter.CategoryAdapter;
 import com.example.dack1.ui.viewmodel.CategoryViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.dack1.ui.view.BaseActivity;
 
-public class CostalActivity extends AppCompatActivity implements CategoryAdapter.OnCategoryActionListener {
+public class CostalActivity extends BaseActivity implements CategoryAdapter.OnCategoryActionListener {
 
     private CategoryViewModel categoryViewModel;
     private CategoryAdapter categoryAdapter;
