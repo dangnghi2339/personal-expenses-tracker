@@ -25,7 +25,7 @@ import androidx.annotation.NonNull; // Thêm import này
  * @Database annotation khai báo tất cả các Entity thuộc về CSDL này và phiên bản của nó.
  */
 // SỬA LỖI 1: Thêm User.class và Tăng version lên 3
-@Database(entities = {Transaction.class, Category.class, Budget.class, User.class}, version = 5, exportSchema = false)
+@Database(entities = {Transaction.class, Category.class, Budget.class, User.class}, version = 6, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     // Cung cấp các phương thức abstract để Room có thể tạo ra các DAO tương ứng.
