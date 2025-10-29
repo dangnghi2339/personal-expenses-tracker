@@ -6,16 +6,29 @@ import androidx.lifecycle.LiveData;
 import com.example.dack1.data.local.dao.UserDao;
 import com.example.dack1.data.local.database.AppDatabase;
 import com.example.dack1.data.model.User;
-import java.util.List;
-import org.mindrot.jbcrypt.BCrypt; // <- Thêm import BCrypt
 
+import java.util.HashMap;
+import java.util.List;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest; // Để cập nhật tên hiển thị
+import com.google.android.gms.tasks.Task; // Cho các tác vụ bất đồng bộ của Firebase
+import com.google.android.gms.tasks.Tasks; // Để đợi tác vụ hoàn thành (dùng cẩn thận)
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import android.util.Log; // Để ghi log lỗi
 /**
  * Repository for User data operations, including authentication with password hashing.
  */
 public class UserRepository {
-
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final UserDao userDao; // <- Thay vì Application, giữ tham chiếu đến UserDao
 
+    private final FirebaseAuth mAuth;
+    private static final String TAG = "UserRepository";
     /**
      * Constructor nhận vào UserDao.
      * @param userDao Data Access Object để tương tác với bảng User.
@@ -23,7 +36,9 @@ public class UserRepository {
     public UserRepository(UserDao userDao) {
         // AppDatabase db = AppDatabase.getDatabase(application); // <- Xóa dòng này
         // this.userDao = db.userDao(); // <- Xóa dòng này
-        this.userDao = userDao; // <- Gán UserDao được truyền vào
+        this.userDao = userDao;
+        this.mAuth = FirebaseAuth.getInstance();
+        this.db = FirebaseFirestore.getInstance();
     }
 
     /**
@@ -34,43 +49,51 @@ public class UserRepository {
      * @return Đối tượng User mới nếu đăng ký thành công, null nếu email đã tồn tại.
      */
     public User registerUser(String name, String email, String password) {
-        // Chạy kiểm tra và insert trên background thread do là I/O operation
-        // Lưu ý: ViewModel đã gọi hàm này trên background thread,
-        // nhưng để an toàn, vẫn có thể dùng Executor ở đây.
-        // Tuy nhiên, để đơn giản, giả sử hàm này được gọi từ background.
-        // Nếu không chắc chắn, hãy bọc các lệnh gọi userDao bằng AppDatabase.databaseWriteExecutor.execute()
-
-        User existingUser = userDao.getUserByEmail(email); // Kiểm tra email tồn tại
-        if (existingUser != null) {
-            return null; // Email đã tồn tại
-        }
-
-        // Mã hóa mật khẩu bằng BCrypt
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(12)); // Độ phức tạp 12
-
-        // Tạo đối tượng User mới với mật khẩu đã mã hóa
-        User newUser = new User();
-        newUser.setName(name); // Đảm bảo model User có setter này
-        newUser.setEmail(email);
-        newUser.setPassword(hashedPassword); // Lưu mật khẩu đã mã hóa
-
-        // Thêm user mới vào database (chạy trên background thread)
-        // Dùng Executor của AppDatabase nếu không chắc chắn hàm này được gọi từ background
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-            userDao.insert(newUser);
-        });
-
-
-        // Trả về user vừa tạo (có thể cần đợi insert hoàn tất hoặc lấy lại từ DB)
-        // Cách đơn giản nhất là lấy lại bằng email
         try {
-            // Đợi một chút để insert có thể hoàn thành (không lý tưởng, chỉ là giải pháp tạm)
-            // Cách tốt hơn là dùng cơ chế callback hoặc Coroutines/RxJava
-            Thread.sleep(100); // Đợi 100ms
-        } catch (InterruptedException e) {
+            // Bước 1: Tạo user (như cũ)
+            Task<com.google.firebase.auth.AuthResult> registerTask = mAuth.createUserWithEmailAndPassword(email, password);
+            com.google.firebase.auth.AuthResult authResult = Tasks.await(registerTask);
+            FirebaseUser firebaseUser = authResult.getUser();
+
+            if (firebaseUser != null) {
+                // Bước 2: Cập nhật profile (như cũ)
+                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(name)
+                        .build();
+                Task<Void> updateProfileTask = firebaseUser.updateProfile(profileUpdates);
+                Tasks.await(updateProfileTask);
+
+                // *** PHẦN MỚI: LƯU THÔNG TIN USER VÀO FIRESTORE ***
+                String uid = firebaseUser.getUid(); // Lấy UID (ID duy nhất) của user
+
+                // Tạo một Map để lưu trữ
+                Map<String, Object> userDocument = new HashMap<>();
+                userDocument.put("name", name);
+                userDocument.put("email", email);
+                userDocument.put("createdAt", com.google.firebase.firestore.FieldValue.serverTimestamp()); // Thêm dấu thời gian
+
+                // Ghi vào collection "users" với ID document là UID của user
+                // Dùng Tasks.await để đảm bảo việc này hoàn tất trước khi trả về
+                Tasks.await(db.collection("users").document(uid).set(userDocument));
+
+                Log.d(TAG, "User document đã được thêm vào Firestore với UID: " + uid);
+                // *** KẾT THÚC PHẦN MỚI ***
+
+                // Trả về đối tượng User (như cũ)
+                User newUser = new User();
+                newUser.setEmail(firebaseUser.getEmail());
+                newUser.setName(firebaseUser.getDisplayName());
+                newUser.setPassword(null);
+                return newUser;
+            } else {
+                Log.w(TAG, "createUserWithEmail:failure - User is null after creation");
+                return null;
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(TAG, "Registration failed", e);
             Thread.currentThread().interrupt();
+            return null;
         }
-        return userDao.getUserByEmail(email);
     }
 
     /**
@@ -80,16 +103,39 @@ public class UserRepository {
      * @return Đối tượng User nếu xác thực thành công, null nếu email không tồn tại hoặc sai mật khẩu.
      */
     public User loginUser(String email, String password) {
-        // Lấy user từ database bằng email (chạy trên background thread)
-        // Giả sử hàm này được ViewModel gọi từ background thread
-        User user = userDao.getUserByEmail(email);
+        try {
+            Task<com.google.firebase.auth.AuthResult> loginTask = mAuth.signInWithEmailAndPassword(email, password);
+            com.google.firebase.auth.AuthResult authResult = Tasks.await(loginTask);
+            FirebaseUser firebaseUser = authResult.getUser();
 
-        // Kiểm tra user có tồn tại và mật khẩu có khớp không
-        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
-            return user; // Đăng nhập thành công
+            if (firebaseUser != null) {
+                // *** TÙY CHỌN: LẤY DỮ LIỆU TỪ FIRESTORE KHI LOGIN ***
+                // Bạn có thể lấy dữ liệu mới nhất từ Firestore thay vì chỉ dùng Auth
+                // DocumentSnapshot userDoc = Tasks.await(db.collection("users").document(firebaseUser.getUid()).get());
+                // String nameFromFirestore;
+                // if (userDoc.exists()) {
+                //    nameFromFirestore = userDoc.getString("name");
+                // } else {
+                //    nameFromFirestore = firebaseUser.getDisplayName(); // Dùng dự phòng
+                // }
+                // *** KẾT THÚC TÙY CHỌN ***
+
+                User loggedInUser = new User();
+                loggedInUser.setEmail(firebaseUser.getEmail());
+                loggedInUser.setName(firebaseUser.getDisplayName()); // Hoặc nameFromFirestore
+                loggedInUser.setPassword(null);
+
+                Log.d(TAG, "User logged in successfully: " + firebaseUser.getUid());
+                return loggedInUser;
+            } else {
+                Log.w(TAG, "signInWithEmail:failure - User is null after sign in");
+                return null;
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(TAG, "Login failed", e);
+            Thread.currentThread().interrupt();
+            return null;
         }
-
-        return null; // Email không tồn tại hoặc sai mật khẩu
     }
 
 
