@@ -7,8 +7,9 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import com.example.dack1.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.dack1.ui.view.BaseActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

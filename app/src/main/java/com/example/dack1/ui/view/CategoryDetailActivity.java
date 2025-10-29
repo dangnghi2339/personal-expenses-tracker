@@ -28,8 +28,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import com.example.dack1.ui.view.BaseActivity;
 
-public class CategoryDetailActivity extends AppCompatActivity {
+public class CategoryDetailActivity extends BaseActivity {
 
     // Các key để truyền Intent
     public static final String EXTRA_CATEGORY_ID = "EXTRA_CATEGORY_ID";

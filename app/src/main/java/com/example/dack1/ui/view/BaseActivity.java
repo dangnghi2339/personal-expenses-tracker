@@ -6,9 +6,8 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-// Import các class cần thiết TỪ DỰ ÁN SRC
 import com.example.dack1.util.LocaleUtil;
-import com.example.dack1.util.SessionManager; // Đảm bảo import đúng
+import com.example.dack1.util.SessionManager;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -28,25 +27,9 @@ public class BaseActivity extends AppCompatActivity {
     // Hàm này giữ nguyên
     @Override
     public void applyOverrideConfiguration(@NonNull android.content.res.Configuration overrideConfiguration) {
-        if (getBaseContext() != null) {
-            // Apply the configuration from the base context
-            // Fix: Should apply overrideConfiguration, not getBaseContext().getResources().getConfiguration() directly
-            // to ensure the language change takes effect properly. Let the system handle merging.
-            // However, the original code might have intended to prevent unexpected overrides.
-            // For simplicity and correctness with LocaleUtil, let's keep the original logic for now.
-            super.applyOverrideConfiguration(getBaseContext().getResources().getConfiguration());
-            // Alternatively, to ensure overrides are applied correctly:
-            // Configuration currentConfig = new Configuration(getBaseContext().getResources().getConfiguration());
-            // currentConfig.updateFrom(overrideConfiguration);
-            // super.applyOverrideConfiguration(currentConfig);
-
-        } else {
-            super.applyOverrideConfiguration(overrideConfiguration);
-        }
+        super.applyOverrideConfiguration(overrideConfiguration);
     }
 
-    // Các hàm này giữ nguyên (mặc dù các Activity mới không dùng nữa)
-    /** Tìm view bằng danh sách TÊN id (string), an toàn vì không cần hằng số R.id tồn tại khi biên dịch. */
     @SuppressWarnings("unchecked")
     protected <T extends View> T findByNames(String... names) {
         if (names == null) return null;
@@ -60,7 +43,6 @@ public class BaseActivity extends AppCompatActivity {
         return null;
     }
 
-    /** Lấy id theo tên. Trả 0 nếu không có. */
     protected int idByName(String name) {
         if (name == null || name.isEmpty()) return 0;
         return getResources().getIdentifier(name, "id", getPackageName());

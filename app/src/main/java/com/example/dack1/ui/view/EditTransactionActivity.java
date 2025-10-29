@@ -26,6 +26,7 @@ import com.example.dack1.data.model.Transaction;
 import com.example.dack1.ui.adapter.CategoryGridAdapter; // Thêm import CategoryGridAdapter
 import com.example.dack1.ui.viewmodel.CategoryViewModel;
 import com.example.dack1.ui.viewmodel.TransactionViewModel;
+import com.example.dack1.ui.view.BaseActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-public class EditTransactionActivity extends AppCompatActivity {
+public class EditTransactionActivity extends BaseActivity {
 
     private TransactionViewModel transactionViewModel;
     private CategoryViewModel categoryViewModel;

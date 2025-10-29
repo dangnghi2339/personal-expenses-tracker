@@ -9,8 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.dack1.R;
 import com.example.dack1.util.SessionManager;
+import com.example.dack1.ui.view.BaseActivity;
 
-public class LogoActivity extends AppCompatActivity {
+public class LogoActivity extends BaseActivity {
     private static final int SPLASH_DELAY = 2000; // 2 seconds
 
     @Override
