@@ -102,7 +102,7 @@ public class ProfileFragment extends Fragment {
 
     private void loadProfileData() {
         if (sessionManager == null || !isAdded()) {
-            return; // Đảm bảo Fragment đã được gắn
+            return;
         }
 
         String userEmail = sessionManager.getUserEmail();

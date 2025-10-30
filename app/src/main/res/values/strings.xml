@@ -25,6 +25,10 @@
     <string name="myResult_add">Ghi chú</string>
     <string name="categorytv_add">Biểu tượng</string>
 
+    <string name="total_amount">Tổng tiền</string>
+    <string name="income">Thu nhập</string>
+    <string name="spending">Chi tiêu</string>
+
     <string name="category_name_required">Tên danh mục không thể để trống</string>
     <string name="select_icon">Vui lòng chọn một biểu tượng</string>
     <string name="select_color">Vui lòng chọn một màu</string>
