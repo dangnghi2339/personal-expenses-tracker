@@ -27,6 +27,10 @@
     <string name="myResult_add">Note</string>
     <string name="categorytv_add">Category</string>
 
+    <string name="total_amount">Total Amount</string>
+    <string name="income">Income</string>
+    <string name="spending">Spending</string>
+
     <!-- Category strings -->
     <string name="category_name_required">Category name cannot be empty</string>
     <string name="select_icon">Please select an icon</string>

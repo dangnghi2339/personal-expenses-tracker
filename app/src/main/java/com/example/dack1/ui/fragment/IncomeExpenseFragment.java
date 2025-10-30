@@ -23,6 +23,7 @@ import com.example.dack1.ui.view.AddTransactionActivity; // Import màn hình Ad
 import com.example.dack1.ui.view.EditTransactionActivity;
 import com.example.dack1.ui.viewmodel.CategoryViewModel;
 import com.example.dack1.ui.viewmodel.TransactionViewModel;
+import com.example.dack1.util.FormatUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.HashMap;
@@ -39,6 +40,10 @@ public class IncomeExpenseFragment extends Fragment implements TransactionAdapte
     private FloatingActionButton fabAddTransaction;
     private TextView tvEmptyList;
 
+    private TextView tvTotalAmount;
+    private TextView tvTotalIncome;
+    private TextView tvTotalSpending;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -52,6 +57,11 @@ public class IncomeExpenseFragment extends Fragment implements TransactionAdapte
         recyclerView = view.findViewById(R.id.rv_transactions);
         fabAddTransaction = view.findViewById(R.id.fab_add_transaction);
         tvEmptyList = view.findViewById(R.id.tv_empty_list);
+
+        tvTotalAmount = view.findViewById(R.id.tvTotalAmount);
+        tvTotalIncome = view.findViewById(R.id.tvTotalIncome);
+        tvTotalSpending = view.findViewById(R.id.tvTotalSpending);
+
         transactionViewModel = new ViewModelProvider(this).get(TransactionViewModel.class);
         categoryViewModel = new ViewModelProvider(this).get(CategoryViewModel.class);
 
@@ -80,8 +90,7 @@ public class IncomeExpenseFragment extends Fragment implements TransactionAdapte
         transactionViewModel.getAllTransactions().observe(getViewLifecycleOwner(), transactions -> {
             // 4. Dùng "submitList" thay vì "setTransactions"
             transactionAdapter.submitList(transactions);
-            
-            // Show/hide empty state
+
             if (transactions == null || transactions.isEmpty()) {
                 recyclerView.setVisibility(View.GONE);
                 tvEmptyList.setVisibility(View.VISIBLE);
@@ -89,6 +98,25 @@ public class IncomeExpenseFragment extends Fragment implements TransactionAdapte
                 recyclerView.setVisibility(View.VISIBLE);
                 tvEmptyList.setVisibility(View.GONE);
             }
+
+            double allTimeIncome = 0.0;
+            double allTimeSpending = 0.0;
+
+            if (transactions != null) {
+                for (Transaction t : transactions) {
+                    if ("income".equalsIgnoreCase(t.getType())) {
+                        allTimeIncome += t.getAmount();
+                    } else {
+                        allTimeSpending += t.getAmount();
+                    }
+                }
+            }
+
+            double totalAmount = allTimeIncome - allTimeSpending;
+
+            tvTotalAmount.setText(FormatUtils.formatCurrency(totalAmount));
+            tvTotalIncome.setText(FormatUtils.formatCurrency(allTimeIncome));
+            tvTotalSpending.setText(FormatUtils.formatCurrency(allTimeSpending));
         });
     }
 
@@ -109,13 +137,8 @@ public class IncomeExpenseFragment extends Fragment implements TransactionAdapte
     // 5. Implement 2 hàm click
     @Override
     public void onItemClick(Transaction transaction) {
-        // Xử lý Sửa (Edit)
-        // Bỏ comment và trỏ đến EditTransactionActivity
         Intent intent = new Intent(getActivity(), EditTransactionActivity.class);
-
-        // Gửi ID của giao dịch qua Intent
         intent.putExtra("TRANSACTION_ID", transaction.getId());
-
         startActivity(intent);
     }
 
