@@ -3,13 +3,12 @@ package com.example.dack1.data.model;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 /**
  * Entity đại diện cho bảng 'categories'.
- * Mỗi danh mục sẽ có một tên không được trùng lặp.
- * Chúng ta thêm một 'index' để tối ưu việc truy vấn và đảm bảo tính duy nhất (unique).
  */
 @Entity(tableName = "categories",
         indices = {@Index(value = {"name"}, unique = true)})
@@ -18,39 +17,40 @@ public class Category {
     @PrimaryKey(autoGenerate = true)
     public long id;
 
-    /**
-     * Tên của danh mục, ví dụ: "Ăn uống", "Lương", "Đi lại".
-     * Tên này là bắt buộc và không được trùng lặp.
-     * @NonNull: Báo cho Room biết rằng cột này không được phép có giá trị null.
-     */
     @NonNull
     @ColumnInfo(name = "name")
     public String name;
 
-    /**
-     * Loại danh mục: "INCOME" hoặc "EXPENSE".
-     * Giúp chúng ta phân loại, ví dụ "Lương" là INCOME, "Ăn uống" là EXPENSE.
-     */
     @NonNull
-    @ColumnInfo(name = "type")
+    @ColumnInfo(name = "type", defaultValue = "EXPENSE") // Mặc định là chi tiêu
     public String type;
 
-    /**
-     * Tên của file icon trong thư mục 'drawable' (ví dụ: "ic_food", "ic_transport").
-     * Lưu dưới dạng String giúp chúng ta linh hoạt trong việc hiển thị icon tương ứng.
-     */
+    // Sửa tên trường thành 'iconName' để khớp logic CostalActivity
     @ColumnInfo(name = "icon_name")
     public String iconName;
 
-    public Category(long id, @NonNull String name, @NonNull String type, String iconName) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.iconName = iconName;
-    }
+    @ColumnInfo(name = "color")
+    public String color; // Thêm trường color
 
+    /**
+     * Constructor rỗng cho Room.
+     */
     public Category() {
     }
+
+    /**
+     * Constructor @Ignore dùng khi tạo mới Category từ UI.
+     * Nhận đủ các trường cần thiết.
+     */
+    @Ignore
+    public Category(@NonNull String name, @NonNull String type, String iconName, String color) {
+        this.name = name;
+        this.type = type;
+        this.iconName = iconName; // Gán vào iconName
+        this.color = color;       // Gán vào color
+    }
+
+    // --- Getters and Setters ---
 
     public long getId() {
         return id;
@@ -78,6 +78,7 @@ public class Category {
         this.type = type;
     }
 
+    // Getter/Setter cho iconName (khớp tên trường)
     public String getIconName() {
         return iconName;
     }
@@ -85,6 +86,13 @@ public class Category {
     public void setIconName(String iconName) {
         this.iconName = iconName;
     }
-    // Constructor, Getters và Setters
-    // ...
+
+    // Getter/Setter cho color (khớp tên trường)
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 }

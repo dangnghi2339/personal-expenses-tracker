@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -12,42 +11,34 @@ import com.example.dack1.data.model.Category;
 
 import java.util.List;
 
-/**
- * DAO cho bảng Category.
- * Cung cấp các phương thức để thao tác với dữ liệu danh mục.
- */
 @Dao
 public interface CategoryDao {
 
-    /**
-     * Chèn một danh mục mới.
-     * OnConflictStrategy.IGNORE: Nếu cố gắng chèn một danh mục có tên đã tồn tại
-     * (do chúng ta đã đặt 'unique' cho cột tên), Room sẽ bỏ qua thao tác chèn này.
-     * Điều này an toàn hơn 'REPLACE' trong trường hợp này.
-     */
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(Category category);
-
-    @Update
-    void update(Category category);
-
-    @Delete
-    void delete(Category category);
-
-    /**
-     * Lấy tất cả các danh mục, sắp xếp theo tên A-Z.
-     * @return LiveData chứa danh sách tất cả các danh mục.
-     */
+    // Lấy tất cả danh mục, trả về LiveData để tự động cập nhật UI
     @Query("SELECT * FROM categories ORDER BY name ASC")
     LiveData<List<Category>> getAllCategories();
 
-    /**
-     * Lấy các danh mục dựa trên loại (INCOME hoặc EXPENSE).
-     * Rất hữu ích khi người dùng đang ở màn hình "Thêm Chi Tiêu",
-     * chúng ta chỉ cần hiển thị các danh mục thuộc loại EXPENSE.
-     * @param type Loại danh mục ("INCOME" hoặc "EXPENSE").
-     * @return LiveData chứa danh sách các danh mục phù hợp.
-     */
-    @Query("SELECT * FROM categories WHERE type = :type ORDER BY name ASC")
-    LiveData<List<Category>> getCategoriesByType(String type);
+    // Lấy một danh mục theo ID (có thể dùng LiveData hoặc không)
+    @Query("SELECT * FROM categories WHERE id = :id")
+    LiveData<Category> getCategoryById(long id); // Dùng LiveData cho nhất quán
+
+    // Thêm một danh mục mới
+    @Insert
+    void insert(Category category);
+
+    // Cập nhật thông tin danh mục
+    @Update
+    void update(Category category);
+
+    // Xóa một danh mục
+    @Delete
+    void delete(Category category);
+
+    // (Hàm cũ của bạn, không cần thiết nữa nếu dùng getCategoryById)
+    // @Query("SELECT name FROM categories WHERE id = :id")
+    // String getNamecate(int id);
+
+    // Tìm theo tên để kiểm tra trùng lặp
+    @Query("SELECT * FROM categories WHERE name = :name LIMIT 1")
+    LiveData<Category> findByName(String name);
 }

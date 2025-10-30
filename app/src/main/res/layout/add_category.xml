@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  SỬA LỖI 1: Thay thế LinearLayout gốc bằng RelativeLayout
+  để ghim TopBar và BottomBar, cho phép nội dung ở giữa cuộn.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:layout_width="412dp"
-    android:layout_height="915dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F3F5F7"
     tools:context=".ui.view.CostalActivity" >
 
+    <!-- KHỐI 1: TOP BAR (Ghim lên trên cùng) -->
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="#F3F5F7"
         android:gravity="center_vertical"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true">
+
         <ImageButton
             android:id="@+id/imageButton12"
             android:layout_width="1dp"
@@ -35,471 +43,23 @@
             android:textColor="#090909"
             android:textSize="24sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Name"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginLeft="25dp">
-    </TextView>
-
-    <EditText
-        android:layout_width="360dp"
-        android:layout_height="60dp"
-        android:background="@drawable/rounded_editext"
-        android:hint="wrt"
-        android:inputType="text"
-        android:textSize="20dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="10dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Icon"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="25dp">
-    </TextView>
-
-    <EditText
-        android:layout_width="360dp"
-        android:layout_height="60dp"
-        android:background="@drawable/rounded_editext"
-        android:hint="wrt"
-        android:inputType="text"
-        android:textSize="20dp"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="10dp">
-
-    </EditText>
-
-    <ScrollView
-        android:layout_width="360dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="25dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal">
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal">
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal">
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal">
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal">
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-                <ImageButton
-                    android:layout_width="70dp"
-                    android:layout_height="55dp"
-                    app:srcCompat="@drawable/ic_profile"
-                    android:background="@drawable/rounded_imagebutton">
-
-                </ImageButton>
-
-            </LinearLayout>
-
-        </LinearLayout>
-    </ScrollView>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Color"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="25dp">
-    </TextView>
-
+    <!-- KHỐI 3: BOTTOM BAR (Ghim xuống dưới cùng) -->
     <LinearLayout
-        android:layout_width="360dp"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:layout_gravity="center">
-
-        <Button
-            android:id="@+id/button"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/black"/>
-
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="@color/white"/>
-
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#F44336" />
-
-        <Button
-            android:id="@+id/button3"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#FF5722" />
-
-        <Button
-            android:id="@+id/button4"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#FF9800" />
-
-        <Button
-            android:id="@+id/button5"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#FFC107" />
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="360dp"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:layout_gravity="center"
-        android:layout_marginTop="15dp">
-
-        <Button
-            android:id="@+id/button6"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#FFEB3B" />
-
-        <Button
-            android:id="@+id/button7"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#CDDC39" />
-
-        <Button
-            android:id="@+id/button8"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#8BC34A" />
-
-        <Button
-            android:id="@+id/button9"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#4CAF50" />
-
-        <Button
-            android:id="@+id/button10"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#009688" />
-
-        <Button
-            android:id="@+id/button11"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:backgroundTint="#00BCD4" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="360dp"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:layout_gravity="center"
-        android:layout_marginTop="15dp">
-
-        <Button
-            android:id="@+id/button12"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/button13"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"/>
-
-        <Button
-            android:id="@+id/button14"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp" />
-
-        <Button
-            android:id="@+id/button15"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp" />
-
-        <Button
-            android:id="@+id/button16"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp" />
-
-        <Button
-            android:id="@+id/button17"
-            android:layout_width="42dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:orientation="vertical"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/rounded_editext">
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/rounded_editext"
+        android:gravity="center">
 
         <Button
             android:id="@+id/btnsave"
             android:layout_width="350dp"
             android:layout_height="60dp"
             android:layout_gravity="center"
-            android:layout_marginTop="15dp"
             android:text="Save catalog"
             android:textSize="20sp"
             app:cornerRadius="10dp"
@@ -508,4 +68,371 @@
             android:backgroundTint="#1073F5"/>
     </LinearLayout>
 
-</LinearLayout>
+    <!--
+      SỬA LỖI 2: Đặt toàn bộ nội dung còn lại vào một ScrollView
+      Nằm DƯỚI topBar và TRÊN bottomBar
+    -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/topBar"
+        android:layout_above="@id/bottomBar"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp"> <!-- Thêm padding để không bị dính sát nút Save -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginLeft="25dp"/>
+
+            <EditText
+                android:id="@+id/et_dialog_category_name"
+                android:layout_width="360dp"
+                android:layout_height="60dp"
+                android:background="@drawable/rounded_editext"
+                android:hint="wrt"
+                android:inputType="text"
+                android:textSize="20dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"/>
+
+            <!-- SỬA LỖI 3: Thêm RadioGroup để chọn Type (Income/Expense) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Type"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="25dp"/>
+
+            <RadioGroup
+                android:id="@+id/rg_category_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp">
+
+                <RadioButton
+                    android:id="@+id/rb_expense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chi tiêu"
+                    android:checked="true"
+                    android:textSize="18sp"/>
+
+                <RadioButton
+                    android:id="@+id/rb_income"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Thu nhập"
+                    android:layout_marginStart="24dp"
+                    android:textSize="18sp"/>
+            </RadioGroup>
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Icon"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="25dp"/>
+
+            <EditText
+                android:id="@+id/et_icon_search"
+                android:layout_width="360dp"
+                android:layout_height="60dp"
+                android:background="@drawable/rounded_editext"
+                android:hint="Search icon (chưa có chức năng)"
+                android:inputType="text"
+                android:textSize="20dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="10dp"/>
+
+            <!--
+              SỬA LỖI 4: Không nên lồng ScrollView bên trong ScrollView.
+              Đã xóa thẻ ScrollView cũ và giữ lại nội dung bên trong.
+              ScrollView cha sẽ tự động cuộn toàn bộ khối này.
+            -->
+            <LinearLayout
+                android:id="@+id/icon_rows_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center"
+                android:layout_marginTop="25dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <!--
+                  SỬA LỖI 5: Thêm 'android:tag' cho mỗi ImageButton.
+                  Tag này phải khớp với tên file icon trong drawable.
+                -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal">
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_profile"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_profile"
+                        android:contentDescription="icon_profile"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_market1"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_market1"
+                        android:contentDescription="icon_market"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_eat_drink"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_eat_drink"
+                        android:contentDescription="icon_eat_drink"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_shopping"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_shopping"
+                        android:contentDescription="icon_shopping"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_gasoline"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_gasoline"
+                        android:contentDescription="icon_gasoline"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal">
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_house"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_house"
+                        android:contentDescription="icon_house"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_electric"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_electric"
+                        android:contentDescription="icon_electric"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_sim"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_sim"
+                        android:contentDescription="icon_sim"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_school"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_school"
+                        android:contentDescription="icon_school"/>
+
+                    <ImageButton
+                        android:layout_width="70dp"
+                        android:layout_height="55dp"
+                        app:srcCompat="@drawable/ic_credit"
+                        android:background="@drawable/rounded_imagebutton"
+                        android:tag="ic_credit"
+                        android:contentDescription="icon_credit"/>
+                </LinearLayout>
+
+                <!-- Thêm các hàng icon khác nếu cần -->
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Color"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="25dp"/>
+
+            <!-- Khối chọn màu (giữ nguyên) -->
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
+                <!-- ... (Button id/button) ... -->
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/black"/>
+                <!-- ... (Các Button màu khác) ... -->
+                <Button
+                    android:id="@+id/button1"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="@color/white"/>
+
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#F44336" />
+
+                <Button
+                    android:id="@+id/button3"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#FF5722" />
+
+                <Button
+                    android:id="@+id/button4"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#FF9800" />
+
+                <Button
+                    android:id="@+id/button5"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#FFC107" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp">
+
+                <Button
+                    android:id="@+id/button6"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#FFEB3B" />
+
+                <Button
+                    android:id="@+id/button7"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#CDDC39" />
+
+                <Button
+                    android:id="@+id/button8"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#8BC34A" />
+
+                <Button
+                    android:id="@+id/button9"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#4CAF50" />
+
+                <Button
+                    android:id="@+id/button10"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#009688" />
+
+                <Button
+                    android:id="@+id/button11"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#00BCD4" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="360dp"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp">
+
+                <Button
+                    android:id="@+id/button12"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#2196F3"/> <!-- Thêm màu cho dễ nhìn -->
+
+                <Button
+                    android:id="@+id/button13"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#3F51B5"/>
+
+                <Button
+                    android:id="@+id/button14"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#673AB7"/>
+
+                <Button
+                    android:id="@+id/button15"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#9C27B0"/>
+
+                <Button
+                    android:id="@+id/button16"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#E91E63"/>
+
+                <Button
+                    android:id="@+id/button17"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:backgroundTint="#795548"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>
